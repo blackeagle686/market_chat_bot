@@ -303,27 +303,28 @@ class RAGPipeline:
     async def query(self, question: str, session_id: Optional[str] = None, system_instruction: Optional[str] = None) -> str:
         """
         Queries the RAG pipeline using the InsightEngine.
-        Optionally uses memory for context-aware retrieval.
+        Uses memory for context, but ensures search is performed on the raw question.
         """
-        refined_question = question
+        history_context = ""
         
         if session_id:
             try:
                 memory = container.get("memory")
                 history = await memory.history.get(session_id)
                 if history:
-                    # Simple query refinement: prepend last few turns to clarify context
-                    context_snippet = ""
-                    for item in history[-2:]:
+                    # Format history for the LLM context, but NOT for the vector search
+                    for item in history[-3:]: # Get last 3 turns
                         role = item["content"].get("role", "unknown")
                         content = item["content"].get("content", "")
-                        context_snippet += f"{role}: {content} "
-                    
-                    refined_question = f"Context: {context_snippet}\nQuestion: {question}"
+                        history_context += f"{role}: {content}\n"
             except KeyError:
                 pass
                 
-        return await self.engine.query(refined_question, system_instruction=system_instruction)
+        return await self.engine.query(
+            question=question, # Search with the raw question!
+            system_instruction=system_instruction,
+            context={"history": history_context} if history_context else None
+        )
 
     async def clear_data(self) -> None:
         """Clears all data from the vector database."""
