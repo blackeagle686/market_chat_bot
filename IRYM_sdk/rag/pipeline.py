@@ -300,7 +300,7 @@ class RAGPipeline:
                 break
         return chunks
 
-    async def query(self, question: str, session_id: Optional[str] = None) -> str:
+    async def query(self, question: str, session_id: Optional[str] = None, system_instruction: Optional[str] = None) -> str:
         """
         Queries the RAG pipeline using the InsightEngine.
         Optionally uses memory for context-aware retrieval.
@@ -323,7 +323,7 @@ class RAGPipeline:
             except KeyError:
                 pass
                 
-        return await self.engine.query(refined_question)
+        return await self.engine.query(refined_question, system_instruction=system_instruction)
 
     async def clear_data(self) -> None:
         """Clears all data from the vector database."""

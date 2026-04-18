@@ -1,6 +1,8 @@
+from typing import Optional
+
 class PromptComposer:
     """Builds structured prompts systematically."""
-    def build_prompt(self, question: str, docs: list) -> str:
+    def build_prompt(self, question: str, docs: list, system_instruction: Optional[str] = None) -> str:
         formatted_docs = []
         for i, doc in enumerate(docs):
             content = doc.get("content", str(doc)) if isinstance(doc, dict) else str(doc)
@@ -9,15 +11,17 @@ class PromptComposer:
             
         context = "\n\n".join(formatted_docs)
         
-        return f"""You are an AI assistant with access to context from multiple resources.
-Your task is to answer the question using the provided context.
-IMPORTANT: Always cite your sources in your answer using [Source: file_name] or [Source: URL].
+        # Use provided system instruction or fallback to a default preamble
+        preamble = system_instruction or "You are a helpful AI assistant with access to the following context."
+        
+        return f"""{preamble}
 
-Context:
+Context Information:
+---------------------
 {context}
+---------------------
 
-Question:
-{question}
+User Question: {question}
 
-Answer in a precise and helpful way, including citations.
+Final Instruction: Answer the question precisely using the provided context. If the answer is not in the context, be honest but helpful.
 """

@@ -26,7 +26,7 @@ class InsightEngine(BaseInsightService):
     async def init(self):
         pass
 
-    async def query(self, question: str, context: Optional[dict] = None):
+    async def query(self, question: str, context: Optional[dict] = None, system_instruction: Optional[str] = None):
         optimized_query = self.optimizer.rewrite_query(question)
         if optimized_query != question:
             logger.info(f"Query optimized: {question} -> {optimized_query}")
@@ -56,7 +56,7 @@ class InsightEngine(BaseInsightService):
             docs = self.optimizer.rerank(docs, optimized_query)
 
         # 3. Prompt construction
-        prompt = self.composer.build_prompt(optimized_query, docs)
+        prompt = self.composer.build_prompt(optimized_query, docs, system_instruction=system_instruction)
 
         # 4. LLM Generation (with runtime fallback)
         try:

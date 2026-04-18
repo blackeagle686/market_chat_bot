@@ -204,12 +204,16 @@ class ChatBotInstance:
                 session_id=self.builder._session_id
             )
         elif self._rag_pipeline:
-            # RAG path - Pass session_id directly to use RAG's built-in memory refinement
-            response_text = await self._rag_pipeline.query(f"{system_instr}{text}", session_id=self.builder._session_id)
-        else:
+            # RAG path - Pass system_prompt separately to avoid mangling it with the user's question
+            response_text = await self._rag_pipeline.query(
+                text, 
+                session_id=self.builder._session_id, 
+                system_instruction=self.builder._system_prompt
+            )
             # Simple LLM path
             llm = container.get("llm")
-            full_prompt = f"{system_instr}Context: Use the following context if relevant.\n{context}\n\nUser: {text}"
+            # Clear separation between instructions, context, and query
+            full_prompt = f"{self.builder._system_prompt}\n\nRelevant Context:\n{context}\n\nQuestion: {text}"
             response_text = await llm.generate(full_prompt)
 
         # 4. Handle Memory Update
