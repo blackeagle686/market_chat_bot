@@ -210,6 +210,7 @@ class ChatBotInstance:
                 session_id=self.builder._session_id, 
                 system_instruction=self.builder._system_prompt
             )
+        else:
             # Simple LLM path
             llm = container.get("llm")
             # Clear separation between instructions, context, and query
