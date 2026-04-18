@@ -245,7 +245,11 @@ class RAGPipeline:
             try:
                 import pandas as pd
                 df = pd.read_excel(path)
-                return df.to_string()
+                rows = []
+                for _, row in df.iterrows():
+                    row_data = [f"{col}: {val}" for col, val in row.items() if pd.notna(val)]
+                    rows.append(" | ".join(row_data))
+                return "\n---\n".join(rows)
             except ImportError:
                 print(f"[!] Warning: pandas/openpyxl not installed. Cannot read Excel: {path}")
                 return ""
@@ -255,13 +259,22 @@ class RAGPipeline:
 
         elif path.endswith(".csv"):
             try:
+                import pandas as pd
+                df = pd.read_csv(path)
+                rows = []
+                for _, row in df.iterrows():
+                    row_data = [f"{col}: {val}" for col, val in row.items() if pd.notna(val)]
+                    rows.append(" | ".join(row_data))
+                return "\n---\n".join(rows)
+            except Exception as e:
                 import csv
                 with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-                    reader = csv.reader(f)
-                    return "\n".join([",".join(row) for row in reader])
-            except Exception as e:
-                print(f"[!] Error reading CSV {path}: {e}")
-                return ""
+                    reader = csv.DictReader(f)
+                    rows = []
+                    for row in reader:
+                        row_data = [f"{k}: {v}" for k, v in row.items() if v]
+                        rows.append(" | ".join(row_data))
+                    return "\n---\n".join(rows)
         
         elif path.endswith(".json"):
             try:
