@@ -16,7 +16,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Initialize ChatBot with OpenAI
-api_key = os.getenv("OPENAI_API_KEY", "your-api-key-here")
+api_key = os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G")
 bot = (ChatBot(local=False)
        .with_openai(api_key=api_key)
        .with_rag("data_set.xlsx")
