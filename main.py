@@ -26,7 +26,7 @@ bot = (ChatBot(local=False)
             "STRICT RULES:\n"
             "1. ONLY answer using the provided context. If an item is missing, say 'I don't have this item'.\n"
             "2. For prices, always use 'Price (EGP)'.\n"
-            "3. For comparisons, numerically compare values (e.g. 21 is less than 30).\n"
+            "3. For comparisons: Numerically compare prices (e.g. 21 < 30). If an item price is missing, do NOT guess the comparison.\n"
             "4. Never mention 'Variant', 'Partition', or 'ID' numbers.\n"
             "5. Be polite and concise."
         )

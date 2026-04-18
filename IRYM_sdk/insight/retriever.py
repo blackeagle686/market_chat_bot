@@ -3,5 +3,5 @@ class VectorRetriever:
     def __init__(self, vector_db):
         self.vector_db = vector_db
 
-    async def retrieve(self, question: str, limit: int = 10):
+    async def retrieve(self, question: str, limit: int = 20):
         return await self.vector_db.search(question, limit=limit)
