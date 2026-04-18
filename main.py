@@ -20,17 +20,15 @@ api_key = os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G")
 bot = (ChatBot(local=False)
        .with_openai(api_key=api_key)
        .with_rag("data_set.xlsx")
-       .with_memory()
-        .with_system_prompt(
-            "You are 'MarketAI', a professional supermarket assistant. "
-            "STRICT RULES:\n"
-            "1. ONLY answer using the provided context. If an item is missing, say 'I don't have this item'.\n"
-            "2. For prices, always use 'Price (EGP)'.\n"
-            "3. For comparisons: Numerically compare prices (e.g. 21 < 30). If an item price is missing, do NOT guess the comparison.\n"
-            "4. Never mention 'Variant', 'Partition', or 'ID' numbers.\n"
-            "5. Be polite and concise."
-        )
-        .build())
+       .with_system_prompt(
+           "You are 'MarketAI'. "
+           "Use ONLY the provided context to answer. "
+           "Extract prices from 'Price (EGP)'. "
+           "Compare numbers directly (e.g., 21 < 30). "
+           "If missing, say 'I don't have this item'. "
+           "No ID/Variant numbers."
+       )
+       .build())
 
 
 @app.on_event("startup")
