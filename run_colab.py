@@ -1,4 +1,5 @@
 import os
+import asyncio
 import uvicorn
 from pyngrok import ngrok
 import nest_asyncio
@@ -24,8 +25,14 @@ def run():
     public_url = ngrok.connect(8000)
     print(f" * MarketAI is running at: {public_url}")
     
-    # Run Uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Ensure a loop exists for nest_asyncio to patch
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+    # Force uvicorn to use standard 'asyncio' loop to avoid uvloop conflicts on Colab
+    uvicorn.run(app, host="0.0.0.0", port=8000, loop="asyncio")
 
 if __name__ == "__main__":
     run()
