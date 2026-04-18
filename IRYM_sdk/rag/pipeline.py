@@ -313,7 +313,7 @@ class RAGPipeline:
                 history = await memory.history.get(session_id)
                 if history:
                     # Format history for the LLM context, but NOT for the vector search
-                    for item in history[-3:]: # Get last 3 turns
+                    for item in history[-2:]: # Get last 2 turns to keep it focused
                         role = item["content"].get("role", "unknown")
                         content = item["content"].get("content", "")
                         history_context += f"{role}: {content}\n"

@@ -127,6 +127,7 @@ class ChatBotInstance:
         # 2. Setup Components
         if self.builder._rag_path:
             self._rag_pipeline = get_rag_pipeline()
+            await self._rag_pipeline.clear_data() # Clear old data once to prevent duplication
             paths = self.builder._rag_path if isinstance(self.builder._rag_path, list) else [self.builder._rag_path]
             for p in paths:
                 logger.info(f"Ingesting: {p}")
