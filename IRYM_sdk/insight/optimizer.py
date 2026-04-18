@@ -16,8 +16,6 @@ class Optimizer:
         # Strip whitespace and normalize
         query = query.strip()
         
-        # Lowercase for better cache hits
-        # (Optional: can be made configurable)
-        query = query.lower()
+        # query = query.lower() # Preserving case for better product name matching
         
         return query
