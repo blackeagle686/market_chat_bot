@@ -245,6 +245,8 @@ class RAGPipeline:
             try:
                 import pandas as pd
                 df = pd.read_excel(path)
+                # Deduplicate to handle data redundancy and prevent context pollution
+                df = df.drop_duplicates()
                 rows = []
                 for _, row in df.iterrows():
                     row_data = [f"{col}: {val}" for col, val in row.items() if pd.notna(val)]
@@ -261,6 +263,8 @@ class RAGPipeline:
             try:
                 import pandas as pd
                 df = pd.read_csv(path)
+                # Deduplicate to handle data redundancy and prevent context pollution
+                df = df.drop_duplicates()
                 rows = []
                 for _, row in df.iterrows():
                     row_data = [f"{col}: {val}" for col, val in row.items() if pd.notna(val)]
