@@ -125,12 +125,14 @@ async def startup_irym():
     
     print("[+] IRYM SDK Services started successfully.")
 
-def get_rag_pipeline() -> RAGPipeline:
+def get_rag_pipeline(prefer_local: bool = False) -> RAGPipeline:
     vector_db = container.get("vector_db")
     llm_openai = container.get("llm_openai")
     llm_local = container.get("llm_local")
     cache = container.get("cache")
-    return RAGPipeline(vector_db, primary=llm_local, fallback=llm_openai, cache=cache)
+    if prefer_local:
+        return RAGPipeline(vector_db, primary=llm_local, fallback=llm_openai, cache=cache)
+    return RAGPipeline(vector_db, primary=llm_openai, fallback=llm_local, cache=cache)
 
 def get_insight_engine(openai_model: str = None, local_model: str = None, prefer_local: bool = True) -> InsightEngine:
     vector_db = container.get("vector_db")

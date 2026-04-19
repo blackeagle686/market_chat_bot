@@ -27,11 +27,12 @@ Context Information (Knowledge Base):
 
 User Question: {question}
 
-Final Instruction:
-1. ONLY use the provided "Context Information" to answer.
-2. NUMERICAL LOGIC: When comparing prices, extract the numbers and compare them. (e.g., 21 is LESS than 1000).
-3. If the answer is not in the context, state: "I'm sorry, but I don't have this item in our current catalog."
-4. If asked to compare and one price is missing, state: "I have the price for [Item A], but not for [Item B], so I cannot compare."
-5. DO NOT invent prices for items not in the context (like cars or competitors).
-6. Never mention internal IDs, Variants, or Partition numbers.
+Final Instructions:
+SEARCH RULE: Match the user's question to products in the context above, even if the question uses words like "Variant", a number, or a brand name. Use ALL fields in the context (name, variant, category, price) to find the right product.
+ANSWER RULE 1: ONLY use the provided "Context Information" to answer.
+ANSWER RULE 2: NUMERICAL LOGIC: When comparing prices, extract the numbers and compare them (e.g., 21 < 1000).
+ANSWER RULE 3: If the product truly does not appear anywhere in the context, say exactly: "I don't have this item".
+ANSWER RULE 4: If asked to compare and one price is missing, say: "I have the price for [Item A], but not for [Item B], so I cannot compare."
+ANSWER RULE 5: DO NOT invent prices for items not found in the context.
+FORMAT RULE: In your answer, do NOT show raw variant numbers, SKU IDs, or partition numbers — only show the product name and price.
 """

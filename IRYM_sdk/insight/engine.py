@@ -68,7 +68,13 @@ class InsightEngine(BaseInsightService):
             docs = self.optimizer.rerank(docs, optimized_query)
 
         if docs:
-            logger.info(f"Using {len(docs)} documents for context (best distance: {docs[0].get('distance', '?'):.3f})")
+            logger.info(
+                f"Using {len(docs)} documents for context "
+                f"(best distance: {docs[0].get('distance', 9999):.3f})"
+            )
+            for i, d in enumerate(docs[:5]):
+                preview = d.get("content", "")[:80].replace("\n", " ")
+                logger.info(f"  Doc[{i}] dist={d.get('distance', '?'):.3f} | {preview}")
         else:
             logger.warning("No documents retrieved — proceeding with empty context.")
 

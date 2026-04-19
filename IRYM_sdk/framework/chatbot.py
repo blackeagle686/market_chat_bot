@@ -126,7 +126,7 @@ class ChatBotInstance:
 
         # 2. Setup Components
         if self.builder._rag_path:
-            self._rag_pipeline = get_rag_pipeline()
+            self._rag_pipeline = get_rag_pipeline(prefer_local=self.builder.local)
 
             paths = (
                 self.builder._rag_path
