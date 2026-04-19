@@ -12,6 +12,11 @@ class InsightEngine(BaseInsightService):
     """
     Main orchestration layer.
     Manages vector retrieval, prompt building, LLM generation, and cache checking.
+
+    Retrieval strategy (in order):
+      1. Semantic search with optimized query.
+      2. Semantic search with query variants (normalized, lowercased, word-split).
+      3. Keyword / substring fallback search.
     """
     def __init__(self, vector_db, primary, fallback, cache=None):
         self.vector_db = vector_db
@@ -30,8 +35,8 @@ class InsightEngine(BaseInsightService):
         optimized_query = self.optimizer.rewrite_query(question)
         if optimized_query != question:
             logger.info(f"Query optimized: {question} -> {optimized_query}")
-        
-        # 0. Selection: Choose provider (Primary preferred)
+
+        # 0. Provider selection
         provider = self.primary
         if hasattr(provider, "is_available") and not provider.is_available():
             confirmed = await async_confirm("Primary LLM provider is unavailable. Switch to Fallback?")
@@ -39,7 +44,7 @@ class InsightEngine(BaseInsightService):
                 return "Operation cancelled by user: Primary unavailable and Fallback rejected."
             provider = self.fallback
 
-        # 1. Cache check (Fast path)
+        # 1. Cache check (fast path)
         cache_key = f"insight:{optimized_query}"
         if self.cache:
             cached = await self.cache.get(cache_key)
@@ -48,17 +53,33 @@ class InsightEngine(BaseInsightService):
                 return cached
             logger.info(f"Insight Cache Miss for key: {cache_key}")
 
-        # 2. Vector retrieval & reranking
-        logger.info(f"Retrieving Knowledge for: {optimized_query[:50]}...")
-        docs = await self.retriever.retrieve(optimized_query)
+        # 2. Multi-step retrieval
+        logger.info(f"Retrieving Knowledge for: {optimized_query[:60]}...")
+        variants = self.optimizer.get_query_variants(optimized_query)
+        docs = await self.retriever.retrieve_with_fallback(
+            primary_query=optimized_query,
+            variants=variants,
+            limit=10,
+        )
+
+        # 3. Rerank & threshold filter
         if docs:
             logger.info(f"Retrieved {len(docs)} documents. Reranking...")
             docs = self.optimizer.rerank(docs, optimized_query)
 
-        # 3. Prompt construction
-        prompt = self.composer.build_prompt(optimized_query, docs, system_instruction=system_instruction, context=context)
+        if docs:
+            logger.info(f"Using {len(docs)} documents for context (best distance: {docs[0].get('distance', '?'):.3f})")
+        else:
+            logger.warning("No documents retrieved — proceeding with empty context.")
 
-        # 4. LLM Generation (with runtime fallback)
+        # 4. Prompt construction
+        prompt = self.composer.build_prompt(
+            optimized_query, docs,
+            system_instruction=system_instruction,
+            context=context,
+        )
+
+        # 5. LLM Generation (with runtime fallback)
         try:
             response = await provider.generate(prompt)
         except Exception as e:
@@ -67,8 +88,7 @@ class InsightEngine(BaseInsightService):
                 confirmed = await async_confirm(f"Primary LLM failed ({e}). Switch to Fallback for this request?")
                 if confirmed:
                     if hasattr(self.fallback, "is_available") and not self.fallback.is_available():
-                        return f"Error: Secondary provider is not configured. Cannot fallback."
-                    
+                        return "Error: Secondary provider is not configured. Cannot fallback."
                     logger.info("Retrying with secondary provider...")
                     try:
                         response = await self.fallback.generate(prompt)
@@ -79,7 +99,7 @@ class InsightEngine(BaseInsightService):
             else:
                 raise e
 
-        # 5. Response caching
+        # 6. Cache response
         if self.cache:
             await self.cache.set(cache_key, response, ttl=300)
 

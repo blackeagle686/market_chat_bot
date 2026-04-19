@@ -41,6 +41,19 @@ class RAGPipeline:
 
         for doc_path in documents:
             print(f"[*] Reading {doc_path}...")
+
+            # Structured files (Excel/CSV): index each row as its own document
+            # to prevent product data from being mixed into multi-product chunks.
+            if doc_path.lower().endswith((".xlsx", ".xls", ".csv")):
+                rows, row_metadatas = self._read_structured_file(doc_path)
+                if not rows:
+                    print(f"[!] Warning: No rows extracted from {doc_path}")
+                    continue
+                print(f"[+] Extracted {len(rows)} structured rows (one document per row).")
+                all_chunks.extend(rows)
+                all_metadatas.extend(row_metadatas)
+                continue
+
             content = self._read_file(doc_path)
             if not content:
                 print(f"[!] Warning: No content extracted from {doc_path}")
@@ -242,57 +255,14 @@ class RAGPipeline:
                 return ""
         
         elif path.endswith((".xlsx", ".xls")):
-            try:
-                import pandas as pd
-                df = pd.read_excel(path)
-                # Deduplicate to handle data redundancy and prevent context pollution
-                df = df.drop_duplicates()
-                
-                # Technical columns to exclude from the LLM's context
-                exclude_cols = {'chunks', 'metadata', 'clean_text'}
-                
-                rows = []
-                for _, row in df.iterrows():
-                    # Only include columns that aren't in the exclusion list
-                    row_data = [f"{col}: {val}" for col, val in row.items() if col not in exclude_cols and pd.notna(val)]
-                    rows.append(" | ".join(row_data))
-                return "\n---\n".join(rows)
-            except ImportError:
-                print(f"[!] Warning: pandas/openpyxl not installed. Cannot read Excel: {path}")
-                return ""
-            except Exception as e:
-                print(f"[!] Error reading Excel {path}: {e}")
-                return ""
+            # For legacy callers; prefer _read_structured_file for per-row indexing.
+            rows, _ = self._read_structured_file(path)
+            return "\n---\n".join(rows) if rows else ""
 
         elif path.endswith(".csv"):
-            try:
-                import pandas as pd
-                df = pd.read_csv(path)
-                # Deduplicate to handle data redundancy and prevent context pollution
-                df = df.drop_duplicates()
-                
-                # Technical columns to exclude from the LLM's context
-                exclude_cols = {'chunks', 'metadata', 'clean_text'}
-                
-                rows = []
-                for _, row in df.iterrows():
-                    # Only include columns that aren't in the exclusion list
-                    row_data = [f"{col}: {val}" for col, val in row.items() if col not in exclude_cols and pd.notna(val)]
-                    rows.append(" | ".join(row_data))
-                return "\n---\n".join(rows)
-            except Exception as e:
-                import csv
-                with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-                    reader = csv.DictReader(f)
-                    
-                    # Technical columns to exclude
-                    exclude_cols = {'chunks', 'metadata', 'clean_text'}
-                    
-                    rows = []
-                    for row in reader:
-                        row_data = [f"{k}: {v}" for k, v in row.items() if k not in exclude_cols and v]
-                        rows.append(" | ".join(row_data))
-                    return "\n---\n".join(rows)
+            # For legacy callers; prefer _read_structured_file for per-row indexing.
+            rows, _ = self._read_structured_file(path)
+            return "\n---\n".join(rows) if rows else ""
         
         elif path.endswith(".json"):
             try:
@@ -306,6 +276,44 @@ class RAGPipeline:
         
         with open(path, 'r', encoding='utf-8', errors='ignore') as f:
             return f.read()
+
+    def _read_structured_file(self, path: str):
+        """
+        Reads an Excel or CSV file and returns (rows, metadatas) where each
+        row is a human-readable string for ONE product/record, and metadatas
+        contains searchable fields extracted from the row.
+        """
+        exclude_cols = {'chunks', 'metadata', 'clean_text'}
+        source_name = os.path.basename(path)
+        rows = []
+        metadatas = []
+        try:
+            import pandas as pd
+            if path.lower().endswith((".xlsx", ".xls")):
+                df = pd.read_excel(path)
+            else:
+                df = pd.read_csv(path)
+            df = df.drop_duplicates()
+
+            for _, row in df.iterrows():
+                row_parts = []
+                meta = {"source": source_name, "path": path}
+                for col, val in row.items():
+                    if col in exclude_cols or not pd.notna(val):
+                        continue
+                    str_val = str(val).strip()
+                    if not str_val or str_val.lower() == 'nan':
+                        continue
+                    row_parts.append(f"{col}: {str_val}")
+                    # Store key columns in metadata for keyword fallback
+                    col_lower = col.lower().replace(' ', '_')
+                    meta[col_lower] = str_val
+                if row_parts:
+                    rows.append(" | ".join(row_parts))
+                    metadatas.append(meta)
+        except Exception as e:
+            print(f"[!] Error reading structured file {path}: {e}")
+        return rows, metadatas
 
     def _chunk_text(self, text: str, size: int, overlap: int) -> List[str]:
         chunks = []

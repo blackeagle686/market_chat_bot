@@ -39,16 +39,42 @@ class ChromaVectorDB(BaseVectorDB):
             query_texts=[query],
             n_results=limit
         )
-        # Flatten results to a list of dicts or documents
+        # Flatten results to a list of dicts
         docs = []
         for i in range(len(results['documents'][0])):
             docs.append({
                 "content": results['documents'][0][i],
                 "metadata": results['metadatas'][0][i] if results['metadatas'] else {},
                 "id": results['ids'][0][i],
-                "distance": results['distances'][0][i] if 'distances' in results else None
+                "distance": results['distances'][0][i] if 'distances' in results else 9999,
             })
         return docs
+
+    async def search_by_keyword(self, keyword: str, limit: int = 10) -> List[Any]:
+        """Substring / keyword search using Chroma's where_document $contains filter."""
+        if not self.collection:
+            await self.init()
+        try:
+            results = self.collection.get(
+                where_document={"$contains": keyword},
+                limit=limit,
+            )
+            docs = []
+            documents = results.get('documents') or []
+            metadatas = results.get('metadatas') or []
+            ids = results.get('ids') or []
+            for i, content in enumerate(documents):
+                docs.append({
+                    "content": content,
+                    "metadata": metadatas[i] if i < len(metadatas) else {},
+                    "id": ids[i] if i < len(ids) else str(i),
+                    "distance": 0.5,  # treat keyword hits as decent matches
+                })
+            return docs
+        except Exception as e:
+            # $contains may not be supported in older Chroma versions
+            print(f"[!] Keyword search failed (unsupported or error): {e}")
+            return []
 
     async def add(self, texts: List[str], metadatas: Optional[List[dict]] = None, ids: Optional[List[str]] = None) -> None:
         if not self.collection:

@@ -127,22 +127,56 @@ class ChatBotInstance:
         # 2. Setup Components
         if self.builder._rag_path:
             self._rag_pipeline = get_rag_pipeline()
-            
-            # Optimization: Only ingest if database is empty to avoid slow first-query response
-            db_content = await self._rag_pipeline.vector_db.get_all()
-            if not db_content or not db_content.get('ids'):
-                logger.info("Vector DB is empty. Starting initial ingestion...")
-                await self._rag_pipeline.clear_data() 
-                paths = self.builder._rag_path if isinstance(self.builder._rag_path, list) else [self.builder._rag_path]
+
+            paths = (
+                self.builder._rag_path
+                if isinstance(self.builder._rag_path, list)
+                else [self.builder._rag_path]
+            )
+
+            # --- Data-version check ---
+            # Compute a hash of the source file(s) so we re-index whenever
+            # the catalog changes, instead of relying on the DB being empty.
+            import hashlib, os
+            hasher = hashlib.md5()
+            for p in paths:
+                if os.path.isfile(p):
+                    with open(p, "rb") as f:
+                        hasher.update(f.read())
+                else:
+                    hasher.update(p.encode())
+            current_hash = hasher.hexdigest()
+
+            # Store the hash as a tiny sentinel file next to the Chroma DB
+            from IRYM_sdk.core.config import config
+            sentinel_path = os.path.join(config.CHROMA_PERSIST_DIR, ".data_hash")
+            stored_hash = ""
+            if os.path.exists(sentinel_path):
+                with open(sentinel_path, "r") as f:
+                    stored_hash = f.read().strip()
+
+            if current_hash != stored_hash:
+                logger.info(
+                    f"Data source changed (hash {current_hash[:8]}…). "
+                    "Clearing DB and re-indexing..."
+                )
+                await self._rag_pipeline.clear_data()
                 for p in paths:
                     logger.info(f"Ingesting: {p}")
                     await self._rag_pipeline.ingest(
                         p,
                         chunk_size=self.builder._rag_config["chunk_size"],
-                        chunk_overlap=self.builder._rag_config["chunk_overlap"]
+                        chunk_overlap=self.builder._rag_config["chunk_overlap"],
                     )
+                # Persist the new hash
+                os.makedirs(config.CHROMA_PERSIST_DIR, exist_ok=True)
+                with open(sentinel_path, "w") as f:
+                    f.write(current_hash)
+                logger.info("Re-indexing complete. Hash sentinel updated.")
             else:
-                logger.info("Vector DB already populated. Skipping re-ingestion for performance.")
+                logger.info(
+                    "Data source unchanged. Skipping re-ingestion for performance."
+                )
         
         if self.builder.vlm_enabled:
             self._vlm_pipeline = get_vlm_pipeline(prefer_local=self.builder.local)
