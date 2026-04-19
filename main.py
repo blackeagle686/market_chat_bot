@@ -74,28 +74,54 @@ async def startup_event():
             unique_products = df["Product Name"].dropna().unique().tolist()
             PRODUCT_CATALOG = {str(p).lower().strip() for p in unique_products}
             print(f"[+] Loaded {len(PRODUCT_CATALOG)} unique products into fuzzy matching catalog.")
+            
+        # Ensure the STT corrections file is created/loaded immediately after reading XLSX
+        load_stt_corrections()
+        print("[+] STT corrections JSON file is ready.")
     except Exception as e:
         print(f"[-] Failed to load product catalog for fuzzy matching: {e}")
 
+def load_stt_corrections() -> dict:
+    import json
+    filepath = "stt_corrections.json"
+    if not os.path.exists(filepath):
+        default_corrections = {
+            "overland": "obour land",
+            "over land": "obour land",
+            "obor land": "obour land",
+            "football land": "obour land",
+            "footbal land": "obour land",
+            "foot ball land": "obour land",
+            "donky": "domty",
+            "donkey": "domty",
+            "dom t": "domty",
+            "jihaina": "juhayna",
+            "johaina": "juhayna",
+            "joe haina": "juhayna",
+            "edita": "edita",
+            "lamar": "lamar",
+            "beyti": "beyti",
+            "baity": "beyti"
+        }
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(default_corrections, f, indent=4)
+        except Exception:
+            pass
+        return default_corrections
+        
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[-] Failed to load {filepath}: {e}")
+        return {}
+
 def apply_query_corrections(query: str) -> str:
-    """Fix common STT mishearings of Egyptian brand names in English and apply fuzzy matching."""
+    """Fix common STT mishearings using an external JSON file and apply fuzzy matching."""
     query_lower = query.lower()
     
-    corrections = {
-        "overland": "obour land",
-        "over land": "obour land",
-        "obor land": "obour land",
-        "donky": "domty",
-        "donkey": "domty",
-        "dom t": "domty",
-        "jihaina": "juhayna",
-        "johaina": "juhayna",
-        "joe haina": "juhayna",
-        "edita": "edita",
-        "lamar": "lamar",
-        "beyti": "beyti",
-        "baity": "beyti"
-    }
+    corrections = load_stt_corrections()
     
     # Step 1: Dictionary replacements
     words = query_lower.split()
@@ -108,12 +134,13 @@ def apply_query_corrections(query: str) -> str:
     # Step 2: Fuzzy match with catalog
     if PRODUCT_CATALOG:
         try:
-            from rapidfuzz import process
+            from rapidfuzz import process, fuzz
             # Extract the single best match from the catalog
-            match_tuple = process.extractOne(query_lower, PRODUCT_CATALOG)
+            # token_set_ratio is great for STT because it handles "I want obour land" matching "obour land"
+            match_tuple = process.extractOne(query_lower, PRODUCT_CATALOG, scorer=fuzz.token_set_ratio)
             if match_tuple:
                 match, score, _ = match_tuple
-                if score > 75:  # High confidence threshold
+                if score >= 65:  # Lower threshold works better with token_set_ratio
                     print(f"[Fuzzy] Corrected '{query}' -> '{match}' (score: {score:.1f})")
                     return match
         except ImportError:
