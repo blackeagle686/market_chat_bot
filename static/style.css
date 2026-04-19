@@ -288,3 +288,33 @@ body {
         font-size: 1.2rem;
     }
 }
+
+/* Audio Button */
+.audio-btn {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--primary);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 12px;
+}
+
+.audio-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.audio-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    margin-left: 3px; /* visual center for play triangle */
+}

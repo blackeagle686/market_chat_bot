@@ -45,7 +45,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             chatWindow.removeChild(loadingMsg);
-            appendMessage(data.answer, 'bot');
+            const msgElement = appendMessage(data.answer, 'bot');
+            
+            if (data.audio) {
+                // Auto-play the audio
+                const audio = new Audio(data.audio);
+                audio.play().catch(e => console.log('Audio autoplay blocked:', e));
+                
+                // Add a play button to the message
+                const playBtn = document.createElement('button');
+                playBtn.className = 'audio-btn';
+                playBtn.title = 'Play Audio';
+                playBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                playBtn.onclick = () => audio.play();
+                msgElement.appendChild(playBtn);
+            }
         } catch (error) {
             chatWindow.removeChild(loadingMsg);
             appendMessage('Sorry, I encountered an error. Please try again.', 'bot');
