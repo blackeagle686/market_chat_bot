@@ -7,6 +7,7 @@ from IRYM_sdk import ChatBot
 from IRYM_sdk.core.lifecycle import lifecycle
 import uvicorn
 from gtts import gTTS
+import uuid
 
 app = FastAPI(title="Market AI ChatBot")
 
@@ -51,8 +52,9 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     audio_dir = os.path.join("static", "audio")
     os.makedirs(audio_dir, exist_ok=True)
     
-    # Generate audio file
-    audio_filename = f"response_{session_id}.mp3"
+    # Generate audio file with unique ID to prevent browser caching
+    unique_id = uuid.uuid4().hex[:8]
+    audio_filename = f"response_{session_id}_{unique_id}.mp3"
     audio_path = os.path.join(audio_dir, audio_filename)
     
     try:
