@@ -247,9 +247,14 @@ class RAGPipeline:
                 df = pd.read_excel(path)
                 # Deduplicate to handle data redundancy and prevent context pollution
                 df = df.drop_duplicates()
+                
+                # Technical columns to exclude from the LLM's context
+                exclude_cols = {'chunks', 'metadata', 'clean_text'}
+                
                 rows = []
                 for _, row in df.iterrows():
-                    row_data = [f"{col}: {val}" for col, val in row.items() if pd.notna(val)]
+                    # Only include columns that aren't in the exclusion list
+                    row_data = [f"{col}: {val}" for col, val in row.items() if col not in exclude_cols and pd.notna(val)]
                     rows.append(" | ".join(row_data))
                 return "\n---\n".join(rows)
             except ImportError:
@@ -265,18 +270,27 @@ class RAGPipeline:
                 df = pd.read_csv(path)
                 # Deduplicate to handle data redundancy and prevent context pollution
                 df = df.drop_duplicates()
+                
+                # Technical columns to exclude from the LLM's context
+                exclude_cols = {'chunks', 'metadata', 'clean_text'}
+                
                 rows = []
                 for _, row in df.iterrows():
-                    row_data = [f"{col}: {val}" for col, val in row.items() if pd.notna(val)]
+                    # Only include columns that aren't in the exclusion list
+                    row_data = [f"{col}: {val}" for col, val in row.items() if col not in exclude_cols and pd.notna(val)]
                     rows.append(" | ".join(row_data))
                 return "\n---\n".join(rows)
             except Exception as e:
                 import csv
                 with open(path, 'r', encoding='utf-8', errors='ignore') as f:
                     reader = csv.DictReader(f)
+                    
+                    # Technical columns to exclude
+                    exclude_cols = {'chunks', 'metadata', 'clean_text'}
+                    
                     rows = []
                     for row in reader:
-                        row_data = [f"{k}: {v}" for k, v in row.items() if v]
+                        row_data = [f"{k}: {v}" for k, v in row.items() if k not in exclude_cols and v]
                         rows.append(" | ".join(row_data))
                     return "\n---\n".join(rows)
         
