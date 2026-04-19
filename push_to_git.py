@@ -34,7 +34,7 @@ def push_to_git():
     # Git commands
     run_command("git add .")
     run_command(f'git commit -m "{commit_msg}"')
-    run_command("git push")
+    run_command("git push -u origin master")
     
     print("Successfully pushed to remote repository!")
 
