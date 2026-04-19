@@ -24,9 +24,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Suggestions
     const suggestionChips = document.querySelectorAll('.suggestion-chip');
+    
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
 
     let currentReplyContext = null;
     const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    
+    // ── Theme Management ─────────────────────────────────────────────────────
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+        
+        // Restore theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    }
 
     // ── Voice recording state ────────────────────────────────────────────────
     let isRecording = false;

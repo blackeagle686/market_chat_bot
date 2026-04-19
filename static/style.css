@@ -9,6 +9,21 @@
     --text-muted: #809a8d;
     --chip-bg: rgba(255, 255, 255, 0.05);
     --chip-border: rgba(255, 255, 255, 0.1);
+    --mic-icon-color: #000;
+}
+
+body.light-mode {
+    --bg-dark: #ffffff;
+    --bg-gradient-top: #ffffff;
+    --bg-gradient-bottom: #f3f6f4;
+    --green-primary: #059669; /* Darker green for text/icons */
+    --green-glow: rgba(5, 150, 105, 0.2);
+    --green-button: #059669; /* Dark emerald for inner button */
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --chip-bg: #ffffff;
+    --chip-border: rgba(0, 0, 0, 0.08);
+    --mic-icon-color: #ffffff;
 }
 
 body {
@@ -62,7 +77,7 @@ body {
     width: 24px;
     height: 24px;
     background: var(--green-primary);
-    color: #000;
+    color: var(--mic-icon-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -136,7 +151,7 @@ body {
     border-radius: 50%;
     background: var(--green-button);
     border: none;
-    color: #000;
+    color: var(--mic-icon-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,6 +175,11 @@ body {
     background: var(--green-primary);
     opacity: 0.15;
     z-index: 1;
+}
+
+body.light-mode .mic-ring {
+    background: #6ee7b7; /* Light mint green for the big circle */
+    opacity: 1; /* Make it solid like the image */
 }
 
 .inner-ring {
@@ -245,16 +265,21 @@ body {
 .suggestion-chip {
     background: var(--chip-bg);
     border: 1px solid var(--chip-border);
-    border-radius: 8px;
-    padding: 12px 20px;
+    border-radius: 12px;
+    padding: 14px 20px;
     color: var(--text-main);
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+body.light-mode .suggestion-chip {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .suggestion-chip svg {
@@ -501,7 +526,7 @@ body {
 .input-group button {
     background: var(--green-button);
     border: none;
-    color: #000;
+    color: var(--mic-icon-color);
     padding: 0 25px;
     border-radius: 30px;
     font-weight: 600;
