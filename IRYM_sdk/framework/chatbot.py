@@ -127,15 +127,22 @@ class ChatBotInstance:
         # 2. Setup Components
         if self.builder._rag_path:
             self._rag_pipeline = get_rag_pipeline()
-            await self._rag_pipeline.clear_data() # Clear old data once to prevent duplication
-            paths = self.builder._rag_path if isinstance(self.builder._rag_path, list) else [self.builder._rag_path]
-            for p in paths:
-                logger.info(f"Ingesting: {p}")
-                await self._rag_pipeline.ingest(
-                    p,
-                    chunk_size=self.builder._rag_config["chunk_size"],
-                    chunk_overlap=self.builder._rag_config["chunk_overlap"]
-                )
+            
+            # Optimization: Only ingest if database is empty to avoid slow first-query response
+            db_content = await self._rag_pipeline.vector_db.get_all()
+            if not db_content or not db_content.get('ids'):
+                logger.info("Vector DB is empty. Starting initial ingestion...")
+                await self._rag_pipeline.clear_data() 
+                paths = self.builder._rag_path if isinstance(self.builder._rag_path, list) else [self.builder._rag_path]
+                for p in paths:
+                    logger.info(f"Ingesting: {p}")
+                    await self._rag_pipeline.ingest(
+                        p,
+                        chunk_size=self.builder._rag_config["chunk_size"],
+                        chunk_overlap=self.builder._rag_config["chunk_overlap"]
+                    )
+            else:
+                logger.info("Vector DB already populated. Skipping re-ingestion for performance.")
         
         if self.builder.vlm_enabled:
             self._vlm_pipeline = get_vlm_pipeline(prefer_local=self.builder.local)

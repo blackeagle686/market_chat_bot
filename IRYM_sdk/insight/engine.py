@@ -39,14 +39,14 @@ class InsightEngine(BaseInsightService):
                 return "Operation cancelled by user: Primary unavailable and Fallback rejected."
             provider = self.fallback
 
-        # 1. Cache check (Fast path) - Disabled for debugging/freshness
-        # cache_key = f"insight:{optimized_query}"
-        # if self.cache:
-        #     cached = await self.cache.get(cache_key)
-        #     if cached:
-        #         logger.info(f"Insight Cache Hit for key: {cache_key}")
-        #         return cached
-        #     logger.info(f"Insight Cache Miss for key: {cache_key}")
+        # 1. Cache check (Fast path)
+        cache_key = f"insight:{optimized_query}"
+        if self.cache:
+            cached = await self.cache.get(cache_key)
+            if cached:
+                logger.info(f"Insight Cache Hit for key: {cache_key}")
+                return cached
+            logger.info(f"Insight Cache Miss for key: {cache_key}")
 
         # 2. Vector retrieval & reranking
         logger.info(f"Retrieving Knowledge for: {optimized_query[:50]}...")
@@ -79,8 +79,8 @@ class InsightEngine(BaseInsightService):
             else:
                 raise e
 
-        # 5. Response caching - Disabled
-        # if self.cache:
-        #     await self.cache.set(cache_key, response, ttl=300)
+        # 5. Response caching
+        if self.cache:
+            await self.cache.set(cache_key, response, ttl=300)
 
         return response
