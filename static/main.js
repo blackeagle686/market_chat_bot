@@ -1,26 +1,70 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // UI Elements
+    const mainUi         = document.getElementById('main-ui');
+    const vaMainView     = document.getElementById('va-main-view');
+    const chatContainer  = document.getElementById('chat-window-container');
+    const closeChatBtn   = document.getElementById('close-chat-btn');
+    
+    // Voice UI Elements
+    const mainMicBtn     = document.getElementById('main-mic-btn');
+    const mainMicWrapper = document.getElementById('main-mic-wrapper');
+    const statusText     = document.getElementById('main-status-text');
+    const transcriptPrev = document.getElementById('transcript-preview');
+    const footerEq       = document.getElementById('footer-equalizer');
+    const footerText     = document.getElementById('footer-text');
+    const exitBtn        = document.getElementById('exit-btn');
+    
+    // Chat Elements
     const chatForm      = document.getElementById('chat-form');
     const chatWindow    = document.getElementById('chat-window');
     const userInput     = document.getElementById('user-input');
     const replyIndicator = document.getElementById('reply-indicator');
     const replySnippet  = document.getElementById('reply-snippet');
     const cancelReply   = document.getElementById('cancel-reply');
-    const micBtn        = document.getElementById('mic-btn');
-    const inputGroup    = micBtn.closest('.input-group');
-    const voiceStatus   = document.getElementById('voice-status');
-    const voiceStatusTxt = document.getElementById('voice-status-text');
+    
+    // Suggestions
+    const suggestionChips = document.querySelectorAll('.suggestion-chip');
 
     let currentReplyContext = null;
     const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
 
     // ── Voice recording state ────────────────────────────────────────────────
     let isRecording = false;
-    let recognition = null;   // Web Speech API instance (primary)
+    let recognition = null;   // Web Speech API instance
     let mediaRecorder = null; // MediaRecorder fallback
     let audioChunks  = [];
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+    function showChatView() {
+        chatContainer.classList.remove('d-none');
+        vaMainView.classList.add('hidden');
+    }
+
+    function hideChatView() {
+        chatContainer.classList.add('d-none');
+        vaMainView.classList.remove('hidden');
+        statusText.textContent = "Listening...";
+        transcriptPrev.classList.remove('visible');
+    }
+
+    closeChatBtn.addEventListener('click', hideChatView);
+
+    // Clicking exit just resets view for now
+    exitBtn.addEventListener('click', () => {
+        hideChatView();
+        stopRecordingAll();
+    });
+
+    suggestionChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const text = chip.textContent.trim();
+            sendMessage(text);
+        });
+    });
+
     function appendMessage(text, side, isLoading = false) {
+        showChatView();
+        
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${side} ${isLoading ? 'loading' : ''}`;
 
@@ -56,6 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function sendMessage(text) {
         text = text.trim();
         if (!text) return;
+
+        showChatView();
 
         const displayUserText = text;
         if (currentReplyContext) {
@@ -123,32 +169,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── Voice UI helpers ─────────────────────────────────────────────────────
-    const micIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>`;
-    const stopIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg>`;
-    const spinnerIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>`;
-
     function setRecordingUI(state) {
         // state: 'idle' | 'recording' | 'transcribing'
-        micBtn.classList.remove('recording', 'transcribing');
-        voiceStatus.style.display = 'none';
-        inputGroup.classList.remove('is-recording');
-
+        mainMicWrapper.classList.remove('is-recording', 'is-transcribing');
+        
         if (state === 'idle') {
-            micBtn.innerHTML = micIcon;
+            statusText.textContent = "Verdant Assistant";
+            footerEq.classList.remove('active');
+            footerText.textContent = "AWAITING VOICE INPUT";
+            transcriptPrev.classList.remove('visible');
         } else if (state === 'recording') {
-            micBtn.classList.add('recording');
-            micBtn.innerHTML = stopIcon;
-            voiceStatus.style.display = 'flex';
-            voiceStatus.classList.remove('transcribing-label');
-            voiceStatusTxt.textContent = 'Recording… click to stop';
-            inputGroup.classList.add('is-recording');
+            mainMicWrapper.classList.add('is-recording');
+            statusText.textContent = "Listening...";
+            footerEq.classList.add('active');
+            footerText.textContent = "RECORDING...";
+            transcriptPrev.textContent = "...";
+            transcriptPrev.classList.add('visible');
         } else if (state === 'transcribing') {
-            micBtn.classList.add('transcribing');
-            micBtn.innerHTML = spinnerIcon;
-            voiceStatus.style.display = 'flex';
-            voiceStatus.classList.add('transcribing-label');
-            voiceStatusTxt.textContent = 'Transcribing…';
-            inputGroup.classList.add('is-recording');
+            mainMicWrapper.classList.add('is-transcribing');
+            statusText.textContent = "Processing...";
+            footerEq.classList.remove('active');
+            footerText.textContent = "TRANSCRIBING...";
         }
     }
 
@@ -156,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startWebSpeech() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.lang = 'en-US'; // English
+        recognition.lang = 'en-US';
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
         recognition.continuous = false;
@@ -171,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript;
             }
+            transcriptPrev.textContent = '"' + transcript + '"';
             userInput.value = transcript;
         };
 
@@ -210,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
 
             mediaRecorder.onstop = async () => {
-                // Stop all mic tracks
                 stream.getTracks().forEach(t => t.stop());
                 setRecordingUI('transcribing');
 
@@ -223,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await res.json();
                     setRecordingUI('idle');
                     if (data.text && data.text.trim()) {
+                        transcriptPrev.textContent = '"' + data.text.trim() + '"';
                         userInput.value = data.text.trim();
                         sendMessage(userInput.value);
                     } else {
@@ -252,26 +294,26 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = false;
     }
 
+    function stopRecordingAll() {
+        setRecordingUI('idle');
+        if (hasWebSpeech) stopWebSpeech();
+        else stopMediaRecorder();
+        isRecording = false;
+    }
+
     // ── Mic button click handler ─────────────────────────────────────────────
     const hasWebSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
-    micBtn.addEventListener('click', () => {
+    mainMicBtn.addEventListener('click', () => {
         if (!isRecording) {
-            // Start recording
-            if (hasWebSpeech) {
-                startWebSpeech();
-            } else {
-                startMediaRecorder();
-            }
+            if (hasWebSpeech) startWebSpeech();
+            else startMediaRecorder();
         } else {
-            // Stop recording
-            setRecordingUI('idle');
-            if (hasWebSpeech) {
-                stopWebSpeech();
-            } else {
-                stopMediaRecorder();
-            }
-            isRecording = false;
+            stopRecordingAll();
         }
     });
+
+    // Initial setup
+    setRecordingUI('idle');
+    statusText.textContent = "Listening..."; // start with listening as default
 });
