@@ -97,44 +97,61 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
 @app.post("/transcribe")
 async def transcribe(audio: UploadFile = File(...)):
     """
-    Fallback STT endpoint for browsers without Web Speech API support.
-    Accepts a WebM audio blob and returns transcribed text via Whisper.
+    STT endpoint using Google SpeechRecognition API (Free).
+    Converts uploaded WebM from browser to WAV, then extracts text.
     """
     import tempfile
+    import subprocess
+    
+    try:
+        import speech_recognition as sr
+    except ImportError:
+        print("[Transcribe] speech_recognition not installed. Please run: pip install SpeechRecognition")
+        return JSONResponse({"text": "", "error": "SpeechRecognition library missing"}, status_code=500)
+
     audio_bytes = await audio.read()
 
-    # Write to a temp file (Whisper needs a file path)
-    suffix = ".webm"
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(audio_bytes)
-        tmp_path = tmp.name
+    # Save WebM locally
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as webm_tmp:
+        webm_tmp.write(audio_bytes)
+        webm_path = webm_tmp.name
+        
+    wav_path = webm_path.replace(".webm", ".wav")
 
     try:
-        from openai import OpenAI
-        client = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G"),
-            base_url=os.getenv("OPENAI_BASE_URL", "https://api.longcat.chat/openai"),
+        # Convert WebM to WAV via ffmpeg
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", webm_path, wav_path],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True
         )
-        with open(tmp_path, "rb") as f:
-            transcription = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f,
-                response_format="text",
-            )
-        text = transcription if isinstance(transcription, str) else transcription.text
+
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(wav_path) as source:
+            audio_data = recognizer.record(source)
+
+        text = ""
+        # Try Arabic first
+        try:
+            text = recognizer.recognize_google(audio_data, language="ar-EG")
+        except sr.UnknownValueError:
+            # Fallback to English
+            try:
+                text = recognizer.recognize_google(audio_data, language="en-US")
+            except sr.UnknownValueError:
+                text = ""
+
         return JSONResponse({"text": text})
+
     except Exception as e:
         print(f"[Transcribe] Error: {e}")
-        # Last-resort: try local whisper if installed
-        try:
-            import whisper
-            model = whisper.load_model("base")
-            result = model.transcribe(tmp_path)
-            return JSONResponse({"text": result["text"]})
-        except ImportError:
-            return JSONResponse({"text": "", "error": "Whisper not available"}, status_code=500)
+        return JSONResponse({"text": "", "error": str(e)}, status_code=500)
     finally:
-        os.unlink(tmp_path)
+        if os.path.exists(webm_path):
+            os.unlink(webm_path)
+        if os.path.exists(wav_path):
+            os.unlink(wav_path)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
