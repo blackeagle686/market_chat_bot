@@ -12,6 +12,8 @@ import uuid
 
 def clean_text_for_speech(text: str) -> str:
     """Removes Markdown symbols so TTS reads only the words and numbers."""
+    # Replace EGP with pounds for better TTS pronunciation
+    text = re.sub(r'\bEGP\b', 'pounds', text)
     # Remove code blocks
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     text = re.sub(r'`(.*?)`', r'\1', text)
