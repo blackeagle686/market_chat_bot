@@ -394,3 +394,66 @@ body {
     margin-bottom: 10px;
     padding-left: 20px;
 }
+
+/* Reply Feature */
+.msg-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.reply-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reply-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.reply-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.reply-indicator {
+    background: rgba(249, 115, 22, 0.08);
+    border-left: 4px solid var(--primary);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    animation: slideUpFade 0.3s ease;
+}
+
+.reply-indicator strong {
+    color: var(--primary);
+    margin-left: 5px;
+}
+
+/* Adjust audio button to fit in msg-actions */
+.msg-actions .audio-btn {
+    margin-top: 0;
+}

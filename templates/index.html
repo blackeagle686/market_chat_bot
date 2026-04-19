@@ -35,6 +35,10 @@
 
         <!-- Footer -->
         <div class="chat-footer">
+            <div id="reply-indicator" class="reply-indicator d-none">
+                <span>Replying to: <strong id="reply-snippet"></strong></span>
+                <button type="button" id="cancel-reply" class="btn-close" aria-label="Close"></button>
+            </div>
             <form id="chat-form">
                 <div class="input-group">
                     <input type="text" id="user-input" class="form-control" placeholder="Ask about products, prices, or deals..." required autocomplete="off">
