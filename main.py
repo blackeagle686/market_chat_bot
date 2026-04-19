@@ -1,4 +1,5 @@
 import os
+import re
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +9,23 @@ from IRYM_sdk.core.lifecycle import lifecycle
 import uvicorn
 from gtts import gTTS
 import uuid
+
+def clean_text_for_speech(text: str) -> str:
+    """Removes Markdown symbols so TTS reads only the words and numbers."""
+    # Remove code blocks
+    text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+    text = re.sub(r'`(.*?)`', r'\1', text)
+    # Replace markdown table pipes with commas for better speech pausing
+    text = text.replace('|', ',')
+    # Remove table separator lines (e.g. ---)
+    text = re.sub(r'-{2,}', '', text)
+    # Remove bold/italic markers
+    text = text.replace('**', '').replace('*', '').replace('__', '').replace('_', '')
+    # Remove header hashes
+    text = re.sub(r'#+\s', '', text)
+    # Remove extra whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
 app = FastAPI(title="Market AI ChatBot")
 
@@ -60,7 +78,8 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     audio_path = os.path.join(audio_dir, audio_filename)
     
     try:
-        tts = gTTS(text=response, lang='en')
+        clean_audio_text = clean_text_for_speech(response)
+        tts = gTTS(text=clean_audio_text, lang='en')
         tts.save(audio_path)
         return {"answer": response, "audio": f"/static/audio/{audio_filename}"}
     except Exception as e:
