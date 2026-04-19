@@ -41,7 +41,8 @@ templates = Jinja2Templates(directory="templates")
 api_key = os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G")
 bot = (ChatBot(local=False)
        .with_openai(api_key=api_key)
-       .with_rag("data_set.xlsx")
+       .with_rag("final_rag_dataset.xlsx")
+       .with_memory()
        .with_system_prompt(
            "You are 'MarketAI', an intelligent question-answering assistant for a supermarket. "
            "Follow these strictly rules to answer the user:\n"
