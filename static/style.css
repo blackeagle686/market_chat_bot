@@ -318,3 +318,79 @@ body {
     fill: currentColor;
     margin-left: 3px; /* visual center for play triangle */
 }
+
+/* Markdown Styles */
+.message table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 0.95rem;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    background: white;
+}
+
+.message th, .message td {
+    padding: 12px 15px;
+    border: 1px solid var(--glass-border);
+    text-align: left;
+}
+
+.message th {
+    background: rgba(249, 115, 22, 0.15); /* Primary Autumn Orange with opacity */
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.message tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.message tr:hover {
+    background: rgba(249, 115, 22, 0.05);
+}
+
+.message.user table, .message.user th, .message.user td {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: transparent;
+}
+
+.message.user th {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.message code {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.message pre code {
+    background: transparent;
+    padding: 0;
+}
+
+.message pre {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.message.user code, .message.user pre {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.message ul, .message ol {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 20px;
+}

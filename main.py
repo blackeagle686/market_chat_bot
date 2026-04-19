@@ -28,7 +28,9 @@ bot = (ChatBot(local=False)
            "Extract prices from 'Price (EGP)'. "
            "Compare numbers directly (e.g., 21 < 30). "
            "If missing, say 'I don't have this item'. "
-           "No ID/Variant numbers."
+           "No ID/Variant numbers. "
+           "Format your answers beautifully using Markdown. "
+           "When listing products, ALWAYS use a Markdown table with columns: Product Name | Price | Partition."
        )
        .build())
 

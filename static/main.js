@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Handle source citations if they exist
             const citationRegex = /\[Source: ([^\]]+)\]/g;
             let processedText = text.replace(citationRegex, '<span class="source-tag">Source: $1</span>');
-            msgDiv.innerHTML = processedText;
+            msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(processedText) : processedText;
         }
         
         chatWindow.appendChild(msgDiv);
@@ -52,12 +52,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const audio = new Audio(data.audio);
                 audio.play().catch(e => console.log('Audio autoplay blocked:', e));
                 
-                // Add a play button to the message
+                // Add a play/pause button to the message
                 const playBtn = document.createElement('button');
                 playBtn.className = 'audio-btn';
-                playBtn.title = 'Play Audio';
-                playBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-                playBtn.onclick = () => audio.play();
+                playBtn.title = 'Pause/Play Audio';
+                
+                const playIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                const pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                
+                playBtn.innerHTML = pauseIcon; // Initially showing pause because it autoplays
+                
+                audio.onended = () => { playBtn.innerHTML = playIcon; };
+                audio.onpause = () => { playBtn.innerHTML = playIcon; };
+                audio.onplay = () => { playBtn.innerHTML = pauseIcon; };
+                
+                playBtn.onclick = () => {
+                    if (audio.paused) {
+                        audio.play();
+                    } else {
+                        audio.pause();
+                    }
+                };
                 msgElement.appendChild(playBtn);
             }
         } catch (error) {
