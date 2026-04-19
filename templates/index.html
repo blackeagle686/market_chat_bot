@@ -41,8 +41,18 @@
             </div>
             <form id="chat-form">
                 <div class="input-group">
-                    <input type="text" id="user-input" class="form-control" placeholder="Ask about products, prices, or deals..." required autocomplete="off">
-                    <button type="submit" class="btn">
+                    <input type="text" id="user-input" class="form-control" placeholder="Ask about products, prices, or deals..." autocomplete="off">
+                    <span id="voice-status"><span class="rec-dot"></span><span id="voice-status-text">Recording...</span></span>
+                    <button type="button" id="mic-btn" title="Click to start / stop recording" aria-label="Record voice message">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="22"/>
+                            <line x1="8" y1="22" x2="16" y2="22"/>
+                        </svg>
+                    </button>
+                    <button type="submit" id="send-btn" class="btn">
                         Send
                     </button>
                 </div>

@@ -1,7 +1,7 @@
 import os
 import re
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from IRYM_sdk import ChatBot
@@ -93,6 +93,48 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     except Exception as e:
         print(f"TTS Error: {e}")
         return {"answer": response}
+
+@app.post("/transcribe")
+async def transcribe(audio: UploadFile = File(...)):
+    """
+    Fallback STT endpoint for browsers without Web Speech API support.
+    Accepts a WebM audio blob and returns transcribed text via Whisper.
+    """
+    import tempfile
+    audio_bytes = await audio.read()
+
+    # Write to a temp file (Whisper needs a file path)
+    suffix = ".webm"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        tmp.write(audio_bytes)
+        tmp_path = tmp.name
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(
+            api_key=os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G"),
+            base_url=os.getenv("OPENAI_BASE_URL", "https://api.longcat.chat/openai"),
+        )
+        with open(tmp_path, "rb") as f:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=f,
+                response_format="text",
+            )
+        text = transcription if isinstance(transcription, str) else transcription.text
+        return JSONResponse({"text": text})
+    except Exception as e:
+        print(f"[Transcribe] Error: {e}")
+        # Last-resort: try local whisper if installed
+        try:
+            import whisper
+            model = whisper.load_model("base")
+            result = model.transcribe(tmp_path)
+            return JSONResponse({"text": result["text"]})
+        except ImportError:
+            return JSONResponse({"text": "", "error": "Whisper not available"}, status_code=500)
+    finally:
+        os.unlink(tmp_path)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
