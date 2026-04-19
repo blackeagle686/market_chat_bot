@@ -20,3 +20,4 @@ sqlalchemy
 pyngrok
 gTTS
 SpeechRecognition
+rapidfuzz

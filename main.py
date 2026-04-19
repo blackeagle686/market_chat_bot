@@ -60,13 +60,66 @@ bot = (ChatBot(local=False)
        )
        .build())
 
+# Global product catalog for fuzzy matching
+PRODUCT_CATALOG = set()
 
 @app.on_event("startup")
 async def startup_event():
-    # The ChatBotInstance handles its own lazy initialization, 
-    # but we can trigger it here if we want to ensure everything is ready.
-    # For now, we'll let the first request trigger it or just call startup_irym indirectly.
-    pass
+    global PRODUCT_CATALOG
+    try:
+        import pandas as pd
+        df = pd.read_excel("final_rag_dataset.xlsx")
+        # Extract unique product names, convert to lowercase strings
+        if "Product Name" in df.columns:
+            unique_products = df["Product Name"].dropna().unique().tolist()
+            PRODUCT_CATALOG = {str(p).lower().strip() for p in unique_products}
+            print(f"[+] Loaded {len(PRODUCT_CATALOG)} unique products into fuzzy matching catalog.")
+    except Exception as e:
+        print(f"[-] Failed to load product catalog for fuzzy matching: {e}")
+
+def apply_query_corrections(query: str) -> str:
+    """Fix common STT mishearings of Egyptian brand names in English and apply fuzzy matching."""
+    query_lower = query.lower()
+    
+    corrections = {
+        "overland": "obour land",
+        "over land": "obour land",
+        "obor land": "obour land",
+        "donky": "domty",
+        "donkey": "domty",
+        "dom t": "domty",
+        "jihaina": "juhayna",
+        "johaina": "juhayna",
+        "joe haina": "juhayna",
+        "edita": "edita",
+        "lamar": "lamar",
+        "beyti": "beyti",
+        "baity": "beyti"
+    }
+    
+    # Step 1: Dictionary replacements
+    words = query_lower.split()
+    # Also check multi-word phrases by doing a simple string replace
+    for wrong, right in corrections.items():
+        import re
+        pattern = re.compile(r'\b' + re.escape(wrong) + r'\b', re.IGNORECASE)
+        query_lower = pattern.sub(right, query_lower)
+
+    # Step 2: Fuzzy match with catalog
+    if PRODUCT_CATALOG:
+        try:
+            from rapidfuzz import process
+            # Extract the single best match from the catalog
+            match_tuple = process.extractOne(query_lower, PRODUCT_CATALOG)
+            if match_tuple:
+                match, score, _ = match_tuple
+                if score > 75:  # High confidence threshold
+                    print(f"[Fuzzy] Corrected '{query}' -> '{match}' (score: {score:.1f})")
+                    return match
+        except ImportError:
+            pass # fallback if rapidfuzz isn't installed
+            
+    return query_lower
 
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):
@@ -74,7 +127,9 @@ async def read_item(request: Request):
 
 @app.post("/chat")
 async def chat(text: str = Form(...), session_id: str = Form("default")):
-    response = await bot.set_session(session_id).chat(text)
+    # Correct STT mishearings before processing
+    corrected_text = apply_query_corrections(text)
+    response = await bot.set_session(session_id).chat(corrected_text)
     
     # Ensure audio directory exists
     audio_dir = os.path.join("static", "audio")
