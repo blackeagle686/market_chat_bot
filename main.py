@@ -132,15 +132,11 @@ async def transcribe(audio: UploadFile = File(...)):
             audio_data = recognizer.record(source)
 
         text = ""
-        # Try Arabic first
+        # Use English
         try:
-            text = recognizer.recognize_google(audio_data, language="ar-EG")
+            text = recognizer.recognize_google(audio_data, language="en-US")
         except sr.UnknownValueError:
-            # Fallback to English
-            try:
-                text = recognizer.recognize_google(audio_data, language="en-US")
-            except sr.UnknownValueError:
-                text = ""
+            text = ""
 
         return JSONResponse({"text": text})
 

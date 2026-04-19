@@ -19,3 +19,4 @@ celery
 sqlalchemy
 pyngrok
 gTTS
+SpeechRecognition

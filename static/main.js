@@ -123,20 +123,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── Voice UI helpers ─────────────────────────────────────────────────────
+    const micIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>`;
+    const stopIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg>`;
+    const spinnerIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>`;
+
     function setRecordingUI(state) {
         // state: 'idle' | 'recording' | 'transcribing'
         micBtn.classList.remove('recording', 'transcribing');
         voiceStatus.style.display = 'none';
         inputGroup.classList.remove('is-recording');
 
-        if (state === 'recording') {
+        if (state === 'idle') {
+            micBtn.innerHTML = micIcon;
+        } else if (state === 'recording') {
             micBtn.classList.add('recording');
+            micBtn.innerHTML = stopIcon;
             voiceStatus.style.display = 'flex';
             voiceStatus.classList.remove('transcribing-label');
             voiceStatusTxt.textContent = 'Recording… click to stop';
             inputGroup.classList.add('is-recording');
         } else if (state === 'transcribing') {
             micBtn.classList.add('transcribing');
+            micBtn.innerHTML = spinnerIcon;
             voiceStatus.style.display = 'flex';
             voiceStatus.classList.add('transcribing-label');
             voiceStatusTxt.textContent = 'Transcribing…';
@@ -148,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startWebSpeech() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.lang = 'ar-EG'; // Arabic (Egypt) — change to 'en-US' if needed
+        recognition.lang = 'en-US'; // English
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
         recognition.continuous = false;
