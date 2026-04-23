@@ -33,7 +33,13 @@
         <div class="grid">
             {% for category in categories %}
             <a href="/category/{{ category.id }}" class="card animate-in" style="animation-delay: {{ loop.index0 * 0.07 }}s">
-                <div class="card-img">🛒</div>
+                <div class="card-img">
+                    {% if category.image_url %}
+                    <img src="{{ category.image_url }}" alt="{{ category.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    🛒
+                    {% endif %}
+                </div>
                 <div class="card-title">{{ category.name }}</div>
                 <div class="card-desc">{{ category.products | length }} products available</div>
             </a>

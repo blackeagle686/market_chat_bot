@@ -30,19 +30,28 @@
         display: flex;
         gap: 2px;
     }
-    .star-rating-interactive {
-        cursor: pointer;
-        font-size: 2rem;
+    
+    /* Image Styles */
+    .product-img-container {
+        width: 100%;
+        height: 160px;
+        background: var(--search-bg);
+        border-radius: 12px;
+        margin-bottom: 0.8rem;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
         justify-content: center;
     }
-    .star-rating-interactive i {
-        transition: transform 0.2s ease;
+    .product-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
-    .star-rating-interactive i:hover {
-        transform: scale(1.2);
-    }
-    .star-rating-interactive i.bi-star {
+    .product-img-container i {
+        font-size: 3rem;
         color: var(--text-muted);
+        opacity: 0.5;
     }
 </style>
 {% endblock %}
@@ -89,6 +98,14 @@
                     <span class="badge bg-primary rounded-pill">{{ product.partition or 'General' }}</span>
                 </div>
 
+                <div class="product-img-container mt-2">
+                    {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                    {% else %}
+                    <i class="bi bi-image"></i>
+                    {% endif %}
+                </div>
+
                 <div class="product-content">
                     <h3 class="product-title">{{ product.name }}</h3>
 
@@ -128,7 +145,8 @@
                             data-variant="{{ product.variant if product.variant and product.variant != 'nan' else 'N/A' }}"
                             data-partition="{{ product.partition or 'General' }}"
                             data-category="{{ category.name }}"
-                            data-rating="{{ product.rating or '4.5' }}">
+                            data-rating="{{ product.rating or '4.5' }}"
+                            data-image="{{ product.image_url or '' }}">
                         <i class="bi bi-info-circle me-2"></i>View Details
                     </button>
                 </div>
@@ -176,7 +194,11 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="text-center mb-4">
-                        <div class="display-1 mb-3">🛒</div>
+                        <div class="modal-img-container mb-3 mx-auto rounded-4 overflow-hidden d-flex align-items-center justify-content-center shadow-sm" 
+                             style="width: 160px; height: 160px; background: var(--search-bg);">
+                            <img id="modal-image" src="" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <div id="modal-image-placeholder" class="display-1">🛒</div>
+                        </div>
                         <h2 class="modal-title fw-bold" id="productModalLabel">Product Name</h2>
                         <p class="text-muted mb-0" id="modal-category">Category Name</p>
                         <div class="mt-2 d-flex justify-content-center align-items-center gap-2">
@@ -246,6 +268,7 @@
                 const partition = button.getAttribute('data-partition');
                 const category = button.getAttribute('data-category');
                 const rating = button.getAttribute('data-rating');
+                const image = button.getAttribute('data-image');
                 
                 // Update modal content
                 const modalTitle = productModal.querySelector('.modal-title');
@@ -254,6 +277,8 @@
                 const modalPartition = productModal.querySelector('#modal-partition');
                 const modalCategory = productModal.querySelector('#modal-category');
                 const modalRatingDisplay = productModal.querySelector('#modal-rating-display');
+                const modalImg = productModal.querySelector('#modal-image');
+                const modalImgPlaceholder = productModal.querySelector('#modal-image-placeholder');
                 
                 modalTitle.textContent = name;
                 modalPrice.textContent = price;
@@ -261,6 +286,15 @@
                 modalPartition.textContent = partition;
                 modalCategory.textContent = category;
                 modalRatingDisplay.textContent = rating;
+                
+                if (image) {
+                    modalImg.src = image;
+                    modalImg.style.display = 'block';
+                    modalImgPlaceholder.style.display = 'none';
+                } else {
+                    modalImg.style.display = 'none';
+                    modalImgPlaceholder.style.display = 'block';
+                }
             });
         }
     });
