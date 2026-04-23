@@ -41,7 +41,13 @@ def map_columns(df):
 
 
 def load_excel(excel_file, sheet_name=None):
-    return pd.read_excel(excel_file, sheet_name=sheet_name)
+    df_or_dict = pd.read_excel(excel_file, sheet_name=sheet_name)
+    if isinstance(df_or_dict, dict):
+        # Multiple sheets, pick the first one
+        sheet_names = list(df_or_dict.keys())
+        print(f"Multiple sheets found: {sheet_names}. Using the first sheet: '{sheet_names[0]}'")
+        return df_or_dict[sheet_names[0]]
+    return df_or_dict
 
 
 def get_value(row, mapped_columns, key, default=""):
