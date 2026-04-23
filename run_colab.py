@@ -6,7 +6,7 @@ import nest_asyncio
 from main import app
 
 # Check for Ngrok Auth Token
-NGROK_AUTH_TOKEN = os.getenv("NGROK_AUTH_TOKEN")
+NGROK_AUTH_TOKEN = os.getenv("NGROK_AUTH_TOKEN", "36jW6kAV8Inp5SHYiuIicuuRols_7NkiWdLme3iULLJx3gMS5")
 if NGROK_AUTH_TOKEN:
     ngrok.set_auth_token(NGROK_AUTH_TOKEN)
 else:
