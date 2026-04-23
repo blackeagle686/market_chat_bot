@@ -184,7 +184,12 @@ def get_finetuner(provider: str = None) -> Any:
     provider = provider or config.FINETUNE_PROVIDER
     if provider == "openai":
         return container.get("finetune_openai")
-    return container.get("finetune_local")
+
+    finetuner = container.get("finetune_local")
+    if finetuner is None:
+        # Local fine-tuning is optional and may not be available in lightweight deployments
+        return container.get("finetune_openai")
+    return finetuner
 
 def get_llm() -> Any:
     return container.get("llm")
