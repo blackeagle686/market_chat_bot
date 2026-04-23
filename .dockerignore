@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.git/
+.gitignore
+Dockerfile
+docker-compose.yml
+*.sqlite3
+*.db
+*.log
+IRYM_sdk/tests/
+/static/audio/
