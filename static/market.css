@@ -16,7 +16,7 @@
     --shadow: 0 4px 20px rgba(0,0,0,0.4);
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
     --radius: 16px;
-    --gradient: linear-gradient(125deg, #6B21A8 0%, #7C3AED 40%, #4338CA 70%, #3B82F6 100%);
+    --gradient: linear-gradient(125deg, #60a5fa 0%, #3b82f6 40%, #1d4ed8 70%, #ffffff 100%);
     --nav-bg: rgba(13, 10, 30, 0.85);
     --nav-border: rgba(139,92,246,0.2);
     --search-bg: rgba(255,255,255,0.06);
@@ -413,7 +413,7 @@ body.light-mode .search-bar:focus {
 .price-amount {
     font-weight: 800;
     font-size: 1.3rem;
-    background: linear-gradient(135deg, #c4b5fd, #818cf8);
+    background: linear-gradient(135deg, #60a5fa, #ffffff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
