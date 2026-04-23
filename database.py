@@ -40,6 +40,7 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey("categories.id"))
     rating = Column(Float, default=4.5)
     rating_count = Column(Integer, default=1)
+    image_url = Column(String, nullable=True)
 
     category = relationship("Category", back_populates="products")
 
