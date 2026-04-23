@@ -43,6 +43,35 @@ def clean_text_for_speech(text: str) -> str:
     text = text.strip(' ,')
     return text
 
+def extract_partition_number(text: str) -> int:
+    """
+    Extracts the partition number from the LLM's Markdown answer.
+    Looks for 'Partition' followed by a number or the last column of a table.
+    """
+    # Try common patterns first
+    # 1. "Partition: 5" or "Partition 5" or "partition:5"
+    match = re.search(r'partition[:\s]+(\d+)', text, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+    
+    # 2. Look in Markdown tables. Partition is usually the last column.
+    # Pattern: | Name | Price | 5 |
+    lines = text.split('\n')
+    for line in lines:
+        if '|' in line:
+            # Split by | and filter out empty strings from the ends
+            parts = [p.strip() for p in line.split('|') if p.strip()]
+            # If we have at least 3 parts (Name, Price, Partition)
+            if len(parts) >= 3:
+                # Check if the last part is a number
+                last_part = parts[-1]
+                # Remove any non-numeric chars if needed, but simple \d+ is better
+                num_match = re.search(r'(\d+)', last_part)
+                if num_match:
+                    return int(num_match.group(1))
+                    
+    return 0
+
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(title="Market AI ChatBot")
@@ -394,15 +423,16 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     audio_filename = f"response_{session_id}_{unique_id}.mp3"
     audio_path = os.path.join(audio_dir, audio_filename)
     
-    try:
-        # Detect language for gTTS (simplistic: check for Arabic characters)
-        has_arabic = any("\u0600" <= c <= "\u06FF" for c in response)
-        lang = 'ar' if has_arabic else 'en'
-        
         clean_audio_text = clean_text_for_speech(response)
         tts = gTTS(text=clean_audio_text, lang=lang)
         tts.save(audio_path)
-        return {"answer": response, "audio": f"/static/audio/{audio_filename}"}
+        
+        partition = extract_partition_number(response)
+        return {
+            "answer": response, 
+            "audio": f"/static/audio/{audio_filename}",
+            "partition": partition
+        }
     except Exception as e:
         print(f"TTS Error: {e}")
         return {"answer": response}
@@ -465,33 +495,8 @@ async def transcribe(audio: UploadFile = File(...), lang: str = Form("en")):
 
 @app.post("/extract_partition")
 async def extract_partition(text: str = Form(...)):
-    """
-    Extracts the partition number from the LLM's Markdown answer.
-    Looks for 'Partition' followed by a number or the last column of a table.
-    """
-    # Try common patterns first
-    # 1. "Partition: 5" or "Partition 5" or "partition:5"
-    match = re.search(r'partition[:\s]+(\d+)', text, re.IGNORECASE)
-    if match:
-        return {"partition": int(match.group(1))}
-    
-    # 2. Look in Markdown tables. Partition is usually the last column.
-    # Pattern: | Name | Price | 5 |
-    lines = text.split('\n')
-    for line in lines:
-        if '|' in line:
-            # Split by | and filter out empty strings from the ends
-            parts = [p.strip() for p in line.split('|') if p.strip()]
-            # If we have at least 3 parts (Name, Price, Partition)
-            if len(parts) >= 3:
-                # Check if the last part is a number
-                last_part = parts[-1]
-                # Remove any non-numeric chars if needed, but simple \d+ is better
-                num_match = re.search(r'(\d+)', last_part)
-                if num_match:
-                    return {"partition": int(num_match.group(1))}
-                    
-    return {"partition": 0}
+    partition = extract_partition_number(text)
+    return {"partition": partition}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
