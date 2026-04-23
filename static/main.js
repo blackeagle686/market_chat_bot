@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const replyIndicator = document.getElementById('reply-indicator');
     const replySnippet  = document.getElementById('reply-snippet');
     const cancelReply   = document.getElementById('cancel-reply');
+    const chatMicBtn    = document.getElementById('chat-mic-btn');
     
     // Suggestions
     const suggestionChips = document.querySelectorAll('.suggestion-chip');
@@ -181,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function setRecordingUI(state) {
         // state: 'idle' | 'recording' | 'transcribing'
         mainMicWrapper.classList.remove('is-recording', 'is-transcribing');
+        chatMicBtn.classList.remove('recording');
         
         if (state === 'idle') {
             statusText.textContent = "Verdant Assistant";
@@ -189,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             transcriptPrev.classList.remove('visible');
         } else if (state === 'recording') {
             mainMicWrapper.classList.add('is-recording');
+            chatMicBtn.classList.add('recording');
             statusText.textContent = "Listening...";
             footerEq.classList.add('active');
             footerText.textContent = "RECORDING...";
@@ -196,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             transcriptPrev.classList.add('visible');
         } else if (state === 'transcribing') {
             mainMicWrapper.classList.add('is-transcribing');
+            chatMicBtn.classList.add('recording'); // Keep red while transcribing
             statusText.textContent = "Processing...";
             footerEq.classList.remove('active');
             footerText.textContent = "TRANSCRIBING...";
@@ -318,14 +322,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Mic button click handler ─────────────────────────────────────────────
     const hasWebSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
-    mainMicBtn.addEventListener('click', () => {
+    mainMicBtn.addEventListener('click', toggleRecording);
+    chatMicBtn.addEventListener('click', toggleRecording);
+
+    function toggleRecording() {
         if (!isRecording) {
             if (hasWebSpeech) startWebSpeech();
             else startMediaRecorder();
         } else {
             stopRecordingAll();
         }
-    });
+    }
 
     // Initial setup
     setRecordingUI('idle');
