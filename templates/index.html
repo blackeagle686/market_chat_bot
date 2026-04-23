@@ -183,35 +183,8 @@
             }, 300);
         }
 
-        // Theme toggle — synced via localStorage across all pages
-        document.addEventListener('DOMContentLoaded', () => {
-            const themeBtn = document.getElementById('theme-toggle');
-            if (!themeBtn) return;
-
-            function applyTheme(isLight) {
-                document.body.classList.toggle('light-mode', isLight);
-                localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            }
-
-            // Restore saved preference
-            applyTheme(localStorage.getItem('theme') === 'light');
-
-            themeBtn.addEventListener('click', () => {
-                applyTheme(!document.body.classList.contains('light-mode'));
-            });
-        });
-
-        // Suggestion chip clicks
-        document.querySelectorAll('.suggestion-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const userInput = document.getElementById('user-input');
-                if (userInput) {
-                    userInput.value = chip.textContent.trim();
-                    document.getElementById('chat-window-container').classList.remove('d-none');
-                    document.getElementById('va-main-view').classList.add('hidden');
-                }
-            });
-        });
+        // Theme toggle and suggestion handling are managed in /static/main.js
+        // (This page keeps splash and exit behavior here.)
     </script>
 </body>
 </html>
