@@ -42,7 +42,8 @@ def clean_text_for_speech(text: str) -> str:
                 part_val = re.sub(r'[^\d]', '', partition)
                 if part_val:
                     desc += f", partition number is {part_val}"
-            return desc
+            # Add a significant pause between rows for better clarity
+            return desc + " . . . "
         return row
 
     # Identify and process table rows before general stripping
