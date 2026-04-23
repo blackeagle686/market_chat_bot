@@ -937,7 +937,7 @@ body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(59, 130
     gap: 10px;
 }
 
-.input-group input {
+.input-group .form-control {
     flex: 1;
     background: var(--input-bg);
     border: 1px solid var(--chip-border);
@@ -946,9 +946,16 @@ body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(59, 130
     border-radius: 30px;
     outline: none;
 }
-.input-group input:focus {
+.input-group .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+body.light-mode .input-group .form-control::placeholder {
+    color: rgba(30, 41, 59, 0.5);
+}
+.input-group .form-control:focus {
     border-color: var(--green-primary);
     background: var(--input-focus-bg);
+    color: var(--input-color);
     box-shadow: none;
 }
 .input-group button {
