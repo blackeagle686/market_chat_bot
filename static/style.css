@@ -1179,7 +1179,7 @@ body.light-mode .input-group .form-control::placeholder {
     color: var(--text-main);
     width: 45px;
     height: 45px;
-    border-radius: 50%;
+    border-radius: 50% !important;
     display: flex;
     align-items: center;
     justify-content: center;
