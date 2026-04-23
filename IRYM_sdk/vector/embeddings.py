@@ -31,16 +31,28 @@ class OpenAIEmbeddings(BaseEmbeddings):
                 "openai is not installed. Please install it using: pip install openai"
             )
 
-        self.model_name = model_name or config.EMBEDDING_MODEL or "text-embedding-3-small"
+        self.model_name = model_name or config.EMBEDDING_MODEL or "nvidia/llama-nemotron-embed-vl-1b-v2:free"
         if OpenAIEmbeddings._client is None:
             OpenAIEmbeddings._client = OpenAI(
-                api_key=getattr(config, "OPENAI_API_KEY", None),
-                base_url=getattr(config, "OPENAI_BASE_URL", None) or None,
+                api_key="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",
+                base_url="https://openrouter.ai/api/v1",
             )
         self.client = OpenAIEmbeddings._client
 
     def _embed(self, texts: List[str]) -> List[List[float]]:
-        response = self.client.embeddings.create(model=self.model_name, input=texts)
+        formatted_input = [
+            {
+                "content": [
+                    {"type": "text", "text": text}
+                ]
+            }
+            for text in texts
+        ]
+        response = self.client.embeddings.create(
+            model="nvidia/llama-nemotron-embed-vl-1b-v2:free",
+            input=formatted_input,
+            encoding_format="float"
+        )
         return [item.embedding for item in response.data]
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
