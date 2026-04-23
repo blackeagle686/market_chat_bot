@@ -249,7 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        recognition.start();
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error("[Mic] Recognition start failed:", e);
+            isRecording = false;
+            setRecordingUI('idle');
+            appendMessage(`⚠️ Could not start speech recognition: ${e.message || e}`, 'bot');
+        }
     }
 
     function stopWebSpeech() {
@@ -321,20 +328,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Mic button click handler ─────────────────────────────────────────────
     const hasWebSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    console.log("[Mic] Web Speech API supported:", hasWebSpeech);
 
-    mainMicBtn.addEventListener('click', toggleRecording);
-    chatMicBtn.addEventListener('click', toggleRecording);
+    if (mainMicBtn) {
+        mainMicBtn.addEventListener('click', () => {
+            console.log("[Mic] Main Mic Clicked. isRecording:", isRecording);
+            toggleRecording();
+        });
+    }
+    
+    if (chatMicBtn) {
+        chatMicBtn.addEventListener('click', () => {
+            console.log("[Mic] Chat Mic Clicked. isRecording:", isRecording);
+            toggleRecording();
+        });
+    }
 
     function toggleRecording() {
         if (!isRecording) {
+            console.log("[Mic] Starting recording...");
             if (hasWebSpeech) startWebSpeech();
             else startMediaRecorder();
         } else {
+            console.log("[Mic] Stopping recording...");
             stopRecordingAll();
         }
     }
 
     // Initial setup
     setRecordingUI('idle');
-    statusText.textContent = "Listening..."; // start with listening as default
+    // Don't override status text here, let setRecordingUI handle it
 });
