@@ -1076,6 +1076,35 @@ body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(59, 130
     background: var(--table-th-bg);
 }
 
+/* Row Info Button Styles */
+.row-info-btn {
+    background: var(--btn-bg);
+    border: 1px solid var(--chip-border);
+    color: var(--green-primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    margin: 0 auto;
+}
+
+.row-info-btn:hover {
+    background: var(--green-primary);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px var(--green-glow);
+}
+
+.message td:last-child {
+    text-align: center;
+    width: 50px;
+}
+
 .hidden-chat-form {
     padding: 20px;
     border-top: 1px solid var(--chip-border);

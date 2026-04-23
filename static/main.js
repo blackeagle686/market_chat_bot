@@ -91,6 +91,41 @@ document.addEventListener('DOMContentLoaded', () => {
         return msgDiv;
     }
 
+    function processTableActions(msgElement) {
+        const tables = msgElement.querySelectorAll('table');
+        tables.forEach(table => {
+            const rows = Array.from(table.querySelectorAll('tr'));
+            rows.forEach((row, index) => {
+                if (index === 0) {
+                    // Header row: add "Info" column
+                    const th = document.createElement('th');
+                    th.textContent = 'Info';
+                    row.appendChild(th);
+                } else {
+                    // Data row: add button
+                    // Get row content to use as context BEFORE adding the button cell
+                    const rowData = Array.from(row.cells)
+                        .map(cell => cell.textContent.trim())
+                        .filter(t => t)
+                        .join(', ');
+                    
+                    const td = document.createElement('td');
+                    const infoBtn = document.createElement('button');
+                    infoBtn.className = 'row-info-btn';
+                    infoBtn.innerHTML = '<i class="bi bi-info-circle"></i>';
+                    infoBtn.title = 'Get more info about this product';
+                    
+                    infoBtn.onclick = () => {
+                        sendMessage(`Tell me more information and a detailed description about this product: ${rowData}`);
+                    };
+                    
+                    td.appendChild(infoBtn);
+                    row.appendChild(td);
+                }
+            });
+        });
+    }
+
     function setReplyContext(text) {
         currentReplyContext = text;
         const snippet = text.length > 50 ? text.substring(0, 50) + '...' : text;
@@ -133,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             chatWindow.removeChild(loadingMsg);
             const msgElement = appendMessage(data.answer, 'bot');
+            processTableActions(msgElement);
 
             // Actions row
             const actionsDiv = document.createElement('div');
