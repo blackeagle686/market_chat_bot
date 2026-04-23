@@ -1,6 +1,0 @@
-{
-  "env": {
-    "DATABASE_URL": "sqlite:///:memory:",
-    "PYTHONUNBUFFERED": "1"
-  }
-}
