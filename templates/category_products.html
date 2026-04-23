@@ -3,44 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ category.name }} - Products</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>{{ category.name }} — SmartShopping</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/market.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
+
+    <nav class="nav-bar">
+        <span class="nav-logo">✦ Smart Shopping</span>
+        {% if is_search %}
+        <a href="/catalog" class="nav-back">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+            Back to Catalog
+        </a>
+        {% else %}
+        <a href="/catalog" class="nav-back">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+            All Categories
+        </a>
+        {% endif %}
+    </nav>
+
     <div class="container">
-        <header class="header">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
-                <a href="/catalog" style="text-decoration: none; color: var(--primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="arrow-left" size="20"></i> Back to Categories
-                </a>
-                <h1 style="margin: 0;">{{ category.name }}</h1>
-                <div style="width: 100px;"></div> <!-- Spacer -->
-            </div>
-            
-            <div class="search-container">
-                <form action="{{ '/search' if is_search else '/category/' + (category.id|string) }}" method="get">
-                    <input type="text" name="q" class="search-bar" placeholder="{{ 'Search results...' if is_search else 'Search in ' + category.name + '...' }}" value="{{ query or '' }}">
-                    <button type="submit" class="search-icon" style="background: none; border: none; cursor: pointer;">
-                        <i data-lucide="search"></i>
-                    </button>
-                </form>
-            </div>
-        </header>
+        <div class="page-header">
+            <h1>{{ category.name }}</h1>
+            <p>
+                {% if is_search %}
+                    Showing results for <strong style="color:#c4b5fd">"{{ query }}"</strong>
+                {% else %}
+                    Browse all products in this category
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="search-container">
+            <form action="{{ '/search' if is_search else '/category/' + (category.id | string) }}" method="get">
+                <input type="text" name="q" class="search-bar"
+                    placeholder="{{ 'Search all products...' if is_search else 'Search in ' + category.name + '...' }}"
+                    value="{{ query or '' }}">
+                <button type="submit" class="search-icon">
+                    <i data-lucide="search" style="width:20px;height:20px;"></i>
+                </button>
+            </form>
+        </div>
 
         <div class="grid">
             {% for product in products %}
             <div class="card animate-in" style="animation-delay: {{ loop.index0 * 0.05 }}s">
                 <span class="badge">{{ product.partition or 'General' }}</span>
                 <div class="card-title">{{ product.name }}</div>
-                <div class="card-desc">{{ product.variant }}</div>
-                <div class="price-tag">{{ product.price }} EGP</div>
+                {% if product.variant and product.variant != 'nan' %}
+                <div class="card-desc">Variant: {{ product.variant }}</div>
+                {% endif %}
+                <div class="price-tag">{{ "%.2f" | format(product.price) }} EGP</div>
             </div>
             {% else %}
-            <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
-                <i data-lucide="search-x" size="48" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
-                <p style="color: var(--text-muted); font-size: 1.2rem;">No products found in this category.</p>
+            <div class="empty-state">
+                <i data-lucide="search-x" style="width:48px;height:48px;opacity:0.4"></i>
+                <p>No products found. Try a different search term.</p>
             </div>
             {% endfor %}
         </div>
@@ -48,15 +69,15 @@
         {% if total_pages > 1 %}
         <div class="pagination">
             {% if page > 1 %}
-            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn">Previous</a>
+            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn">← Prev</a>
             {% endif %}
-            
-            {% for p in range(1, total_pages + 1) %}
+
+            {% for p in range([1, page - 2] | max, [total_pages + 1, page + 3] | min) %}
             <a href="?page={{ p }}&q={{ query or '' }}" class="page-btn {{ 'active' if p == page else '' }}">{{ p }}</a>
             {% endfor %}
 
             {% if page < total_pages %}
-            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn">Next</a>
+            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn">Next →</a>
             {% endif %}
         </div>
         {% endif %}
