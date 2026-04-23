@@ -1108,18 +1108,45 @@ body.light-mode .input-group .form-control::placeholder {
     color: var(--input-color);
     box-shadow: none;
 }
+.input-group {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40px;
+    padding: 5px;
+    border: 1px solid var(--chip-border);
+    gap: 8px;
+}
+
+.input-group .form-control {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding-left: 20px;
+}
+
+.input-group .form-control:focus {
+    background: transparent;
+    box-shadow: none;
+    color: var(--text-main);
+}
+
 .input-group button.btn-send-chat {
     background: var(--green-button);
     border: none;
-    color: var(--mic-icon-color);
-    padding: 0 25px;
+    color: white;
+    padding: 0 20px;
     border-radius: 30px;
     font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.input-group button.btn-send-chat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .input-group button.btn-mic-chat {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--chip-border);
+    border: none;
     color: var(--text-main);
     width: 45px;
     height: 45px;
@@ -1128,22 +1155,24 @@ body.light-mode .input-group .form-control::placeholder {
     align-items: center;
     justify-content: center;
     padding: 0;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .input-group button.btn-mic-chat:hover {
     background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
 }
 
 .input-group button.btn-mic-chat.recording {
     background: #ef4444;
     color: white;
-    border-color: #ef4444;
     animation: pulse-small 1.5s infinite;
 }
 
 @keyframes pulse-small {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
