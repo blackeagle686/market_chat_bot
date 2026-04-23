@@ -14,33 +14,57 @@ from database import SessionLocal, Category, Product, User, init_db
 from fastapi.responses import RedirectResponse
 
 def clean_text_for_speech(text: str) -> str:
-    """Removes Markdown symbols so TTS reads only the words and numbers."""
-    # Remove the table header row
-    text = re.sub(r'^\|?\s*Product Name\s*\|.*$', '', text, flags=re.IGNORECASE | re.MULTILINE)
+    """Removes Markdown symbols and adds descriptive words for prices/partitions."""
     
-    # Replace EGP with pounds for better TTS pronunciation
-    text = re.sub(r'\bEGP\b', 'pounds', text)
-    # Remove code blocks
+    # 1. Handle Markdown Tables specifically for better descriptive flow
+    def process_table_rows(match):
+        row = match.group(0).strip()
+        # Skip separator rows like |---|---|
+        if re.match(r'^\|?\s*(?:-+\s*\|?)+\s*$', row):
+            return ""
+        
+        # Split and clean parts
+        parts = [p.strip() for p in row.split('|') if p.strip()]
+        
+        # Skip header row
+        if any(h in parts[0].lower() for h in ["product name", "item", "name"]):
+            return ""
+            
+        if len(parts) >= 2:
+            name = parts[0]
+            price = parts[1]
+            # Clean price (remove EGP etc)
+            price_val = re.sub(r'[^\d\.]', '', price)
+            desc = f"{name}, price is {price_val} pounds"
+            
+            if len(parts) >= 3:
+                partition = parts[2]
+                part_val = re.sub(r'[^\d]', '', partition)
+                if part_val:
+                    desc += f", partition number is {part_val}"
+            return desc
+        return row
+
+    # Identify and process table rows before general stripping
+    text = re.sub(r'^\|.*\|$', process_table_rows, text, flags=re.MULTILINE)
+
+    # 2. General cleanup for non-table text
+    # Replace EGP with 'pounds' and ensure 'price is' context if missing
+    text = re.sub(r'(\d+(?:\.\d+)?)\s*EGP', r'price is \1 pounds', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bEGP\b', 'pounds', text, flags=re.IGNORECASE)
+    
+    # Remove remaining markdown
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     text = re.sub(r'`(.*?)`', r'\1', text)
-    
-    # Remove table separator lines (e.g. |---|---|)
-    text = re.sub(r'^\|?\s*(?:-+\s*\|?)+\s*$', '', text, flags=re.MULTILINE)
-    # Just in case there are standalone ---
-    text = re.sub(r'-{2,}', '', text)
-    
-    # Replace markdown table pipes with commas for better speech pausing
     text = text.replace('|', ',')
-    
-    # Remove bold/italic markers
     text = text.replace('**', '').replace('*', '').replace('__', '').replace('_', '')
-    # Remove header hashes
     text = re.sub(r'#+\s', '', text)
-    # Remove extra whitespace
+    
+    # Final whitespace and comma cleanup
     text = re.sub(r'\s+', ' ', text).strip()
-    # Remove leading/trailing/multiple commas that might be left over from empty table cells
     text = re.sub(r',\s*,', ',', text)
     text = text.strip(' ,')
+    
     return text
 
 def extract_partition_number(text: str) -> int:
