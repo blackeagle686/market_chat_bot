@@ -20,24 +20,10 @@ def init_irym():
     # 1. Register Cache
     container.register("cache", RedisCache())
     
-    # 2. Register LLM Providers
-    container.register("llm_openai", OpenAILLM())
-    container.register("llm_local", LocalLLM())
-    
-    # Compatibility mapping for generic 'llm'
-    # Prefer OpenAI when API key, base URL and model are provided; otherwise use local
-    try:
-        llm_openai = container.get("llm_openai")
-        llm_local = container.get("llm_local")
-        if llm_openai.is_available():
-            container.register("llm", llm_openai)
-        elif llm_local.is_available():
-            container.register("llm", llm_local)
-        else:
-            # Fallback to whatever was registered first
-            container.register("llm", container.get("llm_local"))
-    except Exception:
-        container.register("llm", container.get("llm_local"))
+    # 2. Register LLM Providers (OpenAI only for serverless)
+    llm_openai = OpenAILLM()
+    container.register("llm_openai", llm_openai)
+    container.register("llm", llm_openai)
 
     # 3. Register Embeddings
     try:
@@ -48,23 +34,10 @@ def init_irym():
         embeddings = SentenceTransformerEmbeddings()
     container.register("embeddings", embeddings)
 
-    # 4. Register VLM Providers
-    container.register("vlm_openai", OpenAIVLM())
-    container.register("vlm_local", LocalVLM())
-    
-    # Compatibility mapping for generic 'vlm'
-    # Prefer OpenAI VLM when API key/base URL/model are provided; otherwise use local
-    try:
-        vlm_openai = container.get("vlm_openai")
-        vlm_local = container.get("vlm_local")
-        if vlm_openai.is_available():
-            container.register("vlm", vlm_openai)
-        elif vlm_local.is_available():
-            container.register("vlm", vlm_local)
-        else:
-            container.register("vlm", container.get("vlm_local"))
-    except Exception:
-        container.register("vlm", container.get("vlm_local"))
+    # 4. Register VLM Providers (OpenAI only for serverless)
+    vlm_openai = OpenAIVLM()
+    container.register("vlm_openai", vlm_openai)
+    container.register("vlm", vlm_openai)
     
     # 5. Register Vector DB based on config
     if config.VECTOR_DB_TYPE == "chroma":
@@ -104,13 +77,10 @@ async def startup_irym():
     if hasattr(cache, "init"):
         await cache.init()
     
-    # 2. Start LLM Providers
+    # 2. Start LLM Provider (OpenAI only)
     llm_openai = container.get("llm_openai")
-    llm_local = container.get("llm_local")
     if hasattr(llm_openai, "init"):
         await llm_openai.init()
-    if hasattr(llm_local, "init"):
-        await llm_local.init()
         
     # 3. Start Vector DB
     vector_db = container.get("vector_db")
@@ -119,14 +89,13 @@ async def startup_irym():
     
     # 4. Start VLM Providers
     vlm_openai = container.get("vlm_openai")
-    vlm_local = container.get("vlm_local")
+    # 4. Start VLM Provider (OpenAI only)
+    vlm_openai = container.get("vlm_openai")
     if hasattr(vlm_openai, "init"):
         await vlm_openai.init()
-    if hasattr(vlm_local, "init"):
-        await vlm_local.init()
     
-    # 5. Start Audio Services
-    for service_name in ["stt_local", "stt_openai", "tts_local", "tts_openai"]:
+    # 5. Start Audio Services (OpenAI only)
+    for service_name in ["stt_openai", "tts_openai"]:
         service = container.get(service_name)
         if hasattr(service, "init"):
             await service.init()
@@ -136,45 +105,28 @@ async def startup_irym():
 def get_rag_pipeline(prefer_local: bool = False) -> RAGPipeline:
     vector_db = container.get("vector_db")
     llm_openai = container.get("llm_openai")
-    llm_local = container.get("llm_local")
     cache = container.get("cache")
-    if prefer_local:
-        return RAGPipeline(vector_db, primary=llm_local, fallback=llm_openai, cache=cache)
-    return RAGPipeline(vector_db, primary=llm_openai, fallback=llm_local, cache=cache)
+    return RAGPipeline(vector_db, primary=llm_openai, fallback=None, cache=cache)
 
 def get_insight_engine(openai_model: str = None, local_model: str = None, prefer_local: bool = True) -> InsightEngine:
     vector_db = container.get("vector_db")
     llm_openai = container.get("llm_openai")
-    llm_local = container.get("llm_local")
     cache = container.get("cache")
     
     if openai_model:
         llm_openai.model = openai_model
-    if local_model:
-        llm_local.model = local_model
         
-    if prefer_local:
-        return InsightEngine(vector_db, llm_local, llm_openai, cache)
-        
-    return InsightEngine(vector_db, llm_openai, llm_local, cache)
+    return InsightEngine(vector_db, llm_openai, None, cache)
 
 def get_vlm_pipeline(openai_model: str = None, local_model: str = None, prefer_local: bool = True) -> VLMPipeline:
     vlm_openai = container.get("vlm_openai")
-    vlm_local = container.get("vlm_local")
     vector_db = container.get("vector_db")
     cache = container.get("cache")
     
-    # Dynamic overrides
     if openai_model:
         vlm_openai.model = openai_model
-    if local_model:
-        vlm_local.model = local_model
     
-    if prefer_local:
-        # Local is primary, OpenAI is fallback
-        return VLMPipeline(vlm_local, vlm_openai, vector_db, cache)
-    
-    return VLMPipeline(vlm_openai, vlm_local, vector_db, cache)
+    return VLMPipeline(vlm_openai, None, vector_db, cache)
 
 def get_finetuner(provider: str = None) -> Any:
     """
