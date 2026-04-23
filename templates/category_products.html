@@ -20,8 +20,8 @@
             </div>
             
             <div class="search-container">
-                <form action="/category/{{ category.id }}" method="get">
-                    <input type="text" name="q" class="search-bar" placeholder="Search in {{ category.name }}..." value="{{ query or '' }}">
+                <form action="{{ '/search' if is_search else '/category/' + (category.id|string) }}" method="get">
+                    <input type="text" name="q" class="search-bar" placeholder="{{ 'Search results...' if is_search else 'Search in ' + category.name + '...' }}" value="{{ query or '' }}">
                     <button type="submit" class="search-icon" style="background: none; border: none; cursor: pointer;">
                         <i data-lucide="search"></i>
                     </button>
