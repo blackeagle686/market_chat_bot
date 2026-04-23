@@ -26,12 +26,8 @@ def init_irym():
     container.register("llm", llm_openai)
 
     # 3. Register Embeddings
-    try:
-        from IRYM_sdk.vector.embeddings import OpenAIEmbeddings
-        embeddings = OpenAIEmbeddings()
-    except Exception:
-        from IRYM_sdk.vector.embeddings import SentenceTransformerEmbeddings
-        embeddings = SentenceTransformerEmbeddings()
+    from IRYM_sdk.vector.embeddings import SentenceTransformerEmbeddings
+    embeddings = SentenceTransformerEmbeddings()
     container.register("embeddings", embeddings)
 
     # 4. Register VLM Providers (OpenAI only for serverless)
