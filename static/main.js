@@ -206,7 +206,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function startWebSpeech() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
+        
+        // Use document language (en or ar)
+        const docLang = document.documentElement.lang || 'en';
+        recognition.lang = docLang === 'ar' ? 'ar-SA' : 'en-US';
+        
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
         recognition.continuous = false;
@@ -267,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const blob = new Blob(audioChunks, { type: 'audio/webm' });
                 const formData = new FormData();
                 formData.append('audio', blob, 'voice.webm');
+                formData.append('lang', document.documentElement.lang || 'en');
 
                 try {
                     const res = await fetch('/transcribe', { method: 'POST', body: formData });
