@@ -15,21 +15,32 @@ from fastapi.responses import RedirectResponse
 
 def clean_text_for_speech(text: str) -> str:
     """Removes Markdown symbols so TTS reads only the words and numbers."""
+    # Remove the table header row
+    text = re.sub(r'^\|?\s*Product Name\s*\|.*$', '', text, flags=re.IGNORECASE | re.MULTILINE)
+    
     # Replace EGP with pounds for better TTS pronunciation
     text = re.sub(r'\bEGP\b', 'pounds', text)
     # Remove code blocks
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     text = re.sub(r'`(.*?)`', r'\1', text)
+    
+    # Remove table separator lines (e.g. |---|---|)
+    text = re.sub(r'^\|?\s*(?:-+\s*\|?)+\s*$', '', text, flags=re.MULTILINE)
+    # Just in case there are standalone ---
+    text = re.sub(r'-{2,}', '', text)
+    
     # Replace markdown table pipes with commas for better speech pausing
     text = text.replace('|', ',')
-    # Remove table separator lines (e.g. ---)
-    text = re.sub(r'-{2,}', '', text)
+    
     # Remove bold/italic markers
     text = text.replace('**', '').replace('*', '').replace('__', '').replace('_', '')
     # Remove header hashes
     text = re.sub(r'#+\s', '', text)
     # Remove extra whitespace
     text = re.sub(r'\s+', ' ', text).strip()
+    # Remove leading/trailing/multiple commas that might be left over from empty table cells
+    text = re.sub(r',\s*,', ',', text)
+    text = text.strip(' ,')
     return text
 
 app = FastAPI(title="Market AI ChatBot")
