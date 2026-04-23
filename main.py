@@ -422,7 +422,11 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     unique_id = uuid.uuid4().hex[:8]
     audio_filename = f"response_{session_id}_{unique_id}.mp3"
     audio_path = os.path.join(audio_dir, audio_filename)
-    
+    try:
+        # Detect language for gTTS (simplistic: check for Arabic characters)
+        has_arabic = any("\u0600" <= c <= "\u06FF" for c in response)
+        lang = 'ar' if has_arabic else 'en'
+        
         clean_audio_text = clean_text_for_speech(response)
         tts = gTTS(text=clean_audio_text, lang=lang)
         tts.save(audio_path)
@@ -435,7 +439,7 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
         }
     except Exception as e:
         print(f"TTS Error: {e}")
-        return {"answer": response}
+        return {"answer": response, "partition": extract_partition_number(response)}
 
 @app.post("/transcribe")
 async def transcribe(audio: UploadFile = File(...), lang: str = Form("en")):
