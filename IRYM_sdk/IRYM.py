@@ -11,7 +11,6 @@ from IRYM_sdk.llm.vlm_local import LocalVLM
 from IRYM_sdk.insight.vlm_pipeline import VLMPipeline
 from IRYM_sdk.insight.engine import InsightEngine
 from IRYM_sdk.rag.pipeline import RAGPipeline
-from IRYM_sdk.training.local_finetuner import LocalFineTuner
 from IRYM_sdk.training.openai_finetuner import OpenAIFineTuner
 from IRYM_sdk.memory.manager import MemoryManager
 from IRYM_sdk.audio.local import LocalSTT, LocalTTS
@@ -78,7 +77,12 @@ def init_irym():
     container.register("vector_db", vector_db)
 
     # 6. Register Fine-Tuning Services
-    container.register("finetune_local", LocalFineTuner())
+    try:
+        from IRYM_sdk.training.local_finetuner import LocalFineTuner
+        container.register("finetune_local", LocalFineTuner())
+    except Exception:
+        # Local fine-tuning is optional and may require torch / transformers.
+        container.register("finetune_local", None)
     container.register("finetune_openai", OpenAIFineTuner())
 
     # 7. Register Memory Manager
