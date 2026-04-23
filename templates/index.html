@@ -129,7 +129,10 @@
             <form id="chat-form" class="hidden-chat-form">
                 <div class="input-group">
                     <input type="text" id="user-input" class="form-control" autocomplete="off" placeholder="Type your question...">
-                    <button type="submit" id="send-btn" class="btn">Send</button>
+                    <button type="button" id="chat-mic-btn" class="btn btn-mic-chat" title="Voice Input">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                    <button type="submit" id="send-btn" class="btn btn-send-chat">Send</button>
                 </div>
             </form>
             <div id="reply-indicator" class="reply-indicator d-none">

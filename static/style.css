@@ -1108,13 +1108,43 @@ body.light-mode .input-group .form-control::placeholder {
     color: var(--input-color);
     box-shadow: none;
 }
-.input-group button {
+.input-group button.btn-send-chat {
     background: var(--green-button);
     border: none;
     color: var(--mic-icon-color);
     padding: 0 25px;
     border-radius: 30px;
     font-weight: 600;
+}
+
+.input-group button.btn-mic-chat {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--chip-border);
+    color: var(--text-main);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.input-group button.btn-mic-chat:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.input-group button.btn-mic-chat.recording {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+    animation: pulse-small 1.5s infinite;
+}
+
+@keyframes pulse-small {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 .msg-actions {
