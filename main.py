@@ -43,10 +43,16 @@ def clean_text_for_speech(text: str) -> str:
     text = text.strip(' ,')
     return text
 
+from starlette.middleware.sessions import SessionMiddleware
+
 app = FastAPI(title="Market AI ChatBot")
+
+# Session middleware for admin authentication
+app.add_middleware(SessionMiddleware, secret_key="super-secret-key-change-me")
 
 # Setup static files and templates
 os.makedirs("static", exist_ok=True)
+os.makedirs("static/uploads", exist_ok=True)
 os.makedirs("templates", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -89,18 +95,21 @@ def get_db():
 async def startup_event():
     init_db() # Ensure tables are created
     
-    # Simple migration: add rating columns if they don't exist
+    # Simple migration: add rating and image_url columns if they don't exist
     db = SessionLocal()
     try:
         from sqlalchemy import text
-        db.execute(text("ALTER TABLE products ADD COLUMN rating FLOAT DEFAULT 4.5"))
-        db.execute(text("ALTER TABLE products ADD COLUMN rating_count INTEGER DEFAULT 1"))
-        db.commit()
-        print("[+] Database migrated with rating columns.")
-    except Exception:
-        db.rollback()
-        # Columns probably already exist
-        pass
+        # Ignore errors if columns already exist
+        try: db.execute(text("ALTER TABLE products ADD COLUMN rating FLOAT DEFAULT 4.5")); db.commit()
+        except Exception: db.rollback()
+        
+        try: db.execute(text("ALTER TABLE products ADD COLUMN rating_count INTEGER DEFAULT 1")); db.commit()
+        except Exception: db.rollback()
+        
+        try: db.execute(text("ALTER TABLE products ADD COLUMN image_url TEXT")); db.commit()
+        except Exception: db.rollback()
+        
+        print("[+] Database migrated with rating and image_url columns.")
     finally:
         db.close()
 
@@ -190,6 +199,106 @@ async def rate_product(product_id: int, rating: int = Form(...), db: Session = D
     
     db.commit()
     return {"new_rating": product.rating, "new_count": product.rating_count}
+
+# --- Admin Routes ---
+
+@app.get("/admin/login", response_class=HTMLResponse)
+async def admin_login_page(request: Request):
+    return templates.TemplateResponse("admin_login.html", {"request": request})
+
+@app.post("/admin/login")
+async def admin_login(request: Request, username: str = Form(...), password: str = Form(...)):
+    if username == "admin" and password == "admin": # Simple hardcoded check
+        request.session["admin_logged_in"] = True
+        return RedirectResponse(url="/admin/products", status_code=303)
+    return templates.TemplateResponse("admin_login.html", {"request": request, "error": "Invalid credentials"})
+
+@app.get("/admin/logout")
+async def admin_logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/admin/login")
+
+def is_admin(request: Request):
+    return request.session.get("admin_logged_in")
+
+@app.get("/admin/products", response_class=HTMLResponse)
+async def admin_products(request: Request, q: str = None, page: int = 1, db: Session = Depends(get_db)):
+    if not is_admin(request):
+        return RedirectResponse(url="/admin/login")
+    
+    limit = 20
+    offset = (page - 1) * limit
+    
+    query = db.query(Product)
+    if q:
+        query = query.filter(Product.name.contains(q))
+    
+    total_products = query.count()
+    products = query.offset(offset).limit(limit).all()
+    total_pages = (total_products + limit - 1) // limit
+    
+    return templates.TemplateResponse("admin_products.html", {
+        "request": request,
+        "products": products,
+        "page": page,
+        "total_pages": total_pages,
+        "query": q
+    })
+
+@app.get("/admin/product/edit/{product_id}", response_class=HTMLResponse)
+async def edit_product_page(request: Request, product_id: int, db: Session = Depends(get_db)):
+    if not is_admin(request):
+        return RedirectResponse(url="/admin/login")
+    
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return RedirectResponse(url="/admin/products")
+    
+    categories = db.query(Category).all()
+    return templates.TemplateResponse("admin_edit_product.html", {
+        "request": request,
+        "product": product,
+        "categories": categories
+    })
+
+@app.post("/admin/product/edit/{product_id}")
+async def edit_product(
+    request: Request, 
+    product_id: int, 
+    name: str = Form(...),
+    price: float = Form(...),
+    variant: str = Form(None),
+    partition: str = Form(None),
+    category_id: int = Form(...),
+    image: UploadFile = File(None),
+    db: Session = Depends(get_db)
+):
+    if not is_admin(request):
+        return RedirectResponse(url="/admin/login")
+    
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return RedirectResponse(url="/admin/products")
+    
+    product.name = name
+    product.price = price
+    product.variant = variant
+    product.partition = partition
+    product.category_id = category_id
+    
+    if image and image.filename:
+        # Save image
+        file_extension = os.path.splitext(image.filename)[1]
+        filename = f"product_{product_id}_{uuid.uuid4().hex[:8]}{file_extension}"
+        filepath = os.path.join("static/uploads", filename)
+        
+        with open(filepath, "wb") as f:
+            f.write(await image.read())
+        
+        product.image_url = f"/static/uploads/{filename}"
+    
+    db.commit()
+    return RedirectResponse(url="/admin/products", status_code=303)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):
