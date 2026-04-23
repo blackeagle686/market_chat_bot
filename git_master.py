@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import time
 from datetime import datetime
 
 def run_cmd(cmd):
@@ -45,5 +46,27 @@ def auto_push():
 
     print("[+] Successfully pushed to master! Cheers brother.")
 
+def monitor_and_push(interval=30):
+    print(f"[*] Monitoring for changes every {interval} seconds... Press Ctrl+C to stop.")
+    while True:
+        try:
+            # Check for changes
+            changes = run_cmd("git status --porcelain")
+            if changes:
+                print(f"\n[*] Change detected at {datetime.now().strftime('%H:%M:%S')}")
+                auto_push()
+            
+            time.sleep(interval)
+        except KeyboardInterrupt:
+            print("\n[!] Monitoring stopped by user.")
+            break
+        except Exception as e:
+            print(f"\n[!] An error occurred: {e}")
+            time.sleep(interval)
+
 if __name__ == "__main__":
-    auto_push()
+    # If arguments are passed, do a one-time push. Otherwise, start monitoring.
+    if len(sys.argv) > 1:
+        auto_push()
+    else:
+        monitor_and_push()
