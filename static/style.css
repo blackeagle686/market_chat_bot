@@ -426,8 +426,8 @@ body.light-mode .catalog-btn:hover {
     background: rgba(255,255,255,0.08);
 }
 body.light-mode .icon-btn:hover {
-    background: rgba(124, 58, 237, 0.1);
-    color: #6D28D9;
+    background: rgba(59, 130, 246, 0.1);
+    color: #1d4ed8;
 }
 
 .header-actions {
@@ -775,8 +775,8 @@ body.light-mode .va-footer {
 
 .chat-window::-webkit-scrollbar { width: 6px; }
 .chat-window::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-body.light-mode .chat-window::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.3); }
-body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(124, 58, 237, 0.05); }
+body.light-mode .chat-window::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.3); }
+body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(59, 130, 246, 0.05); }
 
 .message {
     padding: 16px 20px;
@@ -911,7 +911,7 @@ body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(124, 58
 
 .reply-indicator {
     padding: 10px 20px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(96, 165, 250, 0.12);
     border-top: 1px solid var(--green-primary);
     display: flex;
     justify-content: space-between;
