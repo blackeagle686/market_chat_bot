@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Catalog - Categories</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/market.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Explore Our Market</h1>
+            <div class="search-container">
+                <form action="/search" method="get">
+                    <input type="text" name="q" class="search-bar" placeholder="Search for products across all categories..." required>
+                    <button type="submit" class="search-icon" style="background: none; border: none; cursor: pointer;">
+                        <i data-lucide="search"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <section>
+            <h2 style="margin-bottom: 1.5rem; font-weight: 700;">Categories</h2>
+            <div class="grid">
+                {% for category in categories %}
+                <a href="/category/{{ category.id }}" class="card animate-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                    <div class="card-img">
+                        <i data-lucide="package" size="48"></i>
+                    </div>
+                    <div class="card-title">{{ category.name }}</div>
+                    <div class="card-desc">{{ category.products|length }} Products available</div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import os
 import re
-from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi import FastAPI, Request, Form, UploadFile, File, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,6 +9,9 @@ from IRYM_sdk.core.lifecycle import lifecycle
 import uvicorn
 from gtts import gTTS
 import uuid
+from sqlalchemy.orm import Session
+from database import SessionLocal, Category, Product, init_db
+from fastapi.responses import RedirectResponse
 
 def clean_text_for_speech(text: str) -> str:
     """Removes Markdown symbols so TTS reads only the words and numbers."""
@@ -40,7 +43,7 @@ templates = Jinja2Templates(directory="templates")
 # Initialize ChatBot with LongCat (OpenAI-compatible)
 api_key = os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G")
 base_url = os.getenv("OPENAI_BASE_URL", "https://api.longcat.chat/openai")
-bot = (ChatBot(local=False)
+bot = (ChatBot(local=False, vlm=False)
        .with_openai(api_key=api_key, base_url=base_url)
        .with_rag("final_rag_dataset.xlsx")
        .with_memory()
@@ -63,23 +66,91 @@ bot = (ChatBot(local=False)
 # Global product catalog for fuzzy matching
 PRODUCT_CATALOG = set()
 
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 @app.on_event("startup")
 async def startup_event():
+    init_db() # Ensure tables are created
     global PRODUCT_CATALOG
     try:
         import pandas as pd
-        df = pd.read_excel("final_rag_dataset.xlsx")
-        # Extract unique product names, convert to lowercase strings
-        if "Product Name" in df.columns:
-            unique_products = df["Product Name"].dropna().unique().tolist()
-            PRODUCT_CATALOG = {str(p).lower().strip() for p in unique_products}
-            print(f"[+] Loaded {len(PRODUCT_CATALOG)} unique products into fuzzy matching catalog.")
-            
-        # Ensure the STT corrections file is created/loaded immediately after reading XLSX
+        # Load from Excel if RAG dataset exists (keep existing functionality)
+        if os.path.exists("final_rag_dataset.xlsx"):
+            df = pd.read_excel("final_rag_dataset.xlsx")
+            if "Product Name" in df.columns:
+                unique_products = df["Product Name"].dropna().unique().tolist()
+                PRODUCT_CATALOG = {str(p).lower().strip() for p in unique_products}
+                print(f"[+] Loaded {len(PRODUCT_CATALOG)} unique products into fuzzy matching catalog.")
+        
         load_stt_corrections()
-        print("[+] STT corrections JSON file is ready.")
     except Exception as e:
-        print(f"[-] Failed to load product catalog for fuzzy matching: {e}")
+        print(f"[-] Startup error: {e}")
+
+# --- New Market Catalog Routes ---
+
+@app.get("/catalog", response_class=HTMLResponse)
+async def view_catalog(request: Request, db: Session = Depends(get_db)):
+    categories = db.query(Category).all()
+    return templates.TemplateResponse("catalog.html", {"request": request, "categories": categories})
+
+@app.get("/category/{category_id}", response_class=HTMLResponse)
+async def view_category(request: Request, category_id: int, q: str = None, page: int = 1, db: Session = Depends(get_db)):
+    limit = 12
+    offset = (page - 1) * limit
+    
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        return RedirectResponse(url="/catalog")
+    
+    query = db.query(Product).filter(Product.category_id == category_id)
+    if q:
+        query = query.filter(Product.name.contains(q))
+    
+    total_products = query.count()
+    products = query.offset(offset).limit(limit).all()
+    total_pages = (total_products + limit - 1) // limit
+    
+    return templates.TemplateResponse("category_products.html", {
+        "request": request,
+        "category": category,
+        "products": products,
+        "page": page,
+        "total_pages": total_pages,
+        "query": q
+    })
+
+@app.get("/search", response_class=HTMLResponse)
+async def global_search(request: Request, q: str, page: int = 1, db: Session = Depends(get_db)):
+    limit = 12
+    offset = (page - 1) * limit
+    
+    query = db.query(Product).filter(Product.name.contains(q))
+    total_products = query.count()
+    products = query.offset(offset).limit(limit).all()
+    total_pages = (total_products + limit - 1) // limit
+    
+    return templates.TemplateResponse("category_products.html", {
+        "request": request,
+        "category": {"name": f"Search Results for '{q}'", "id": 0}, # Pseudo-category for template
+        "products": products,
+        "page": page,
+        "total_pages": total_pages,
+        "query": q,
+        "is_search": True
+    })
+
+@app.get("/", response_class=HTMLResponse)
+async def read_item(request: Request):
+    # Redirect to catalog as the new landing page, or keep original index
+    return templates.TemplateResponse("index.html", {"request": request})
+
+# --- Rest of the existing code (chat, transcribe, etc.) ---
 
 def load_stt_corrections() -> dict:
     import json

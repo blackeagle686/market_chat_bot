@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} - Products</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/market.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                <a href="/catalog" style="text-decoration: none; color: var(--primary); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="arrow-left" size="20"></i> Back to Categories
+                </a>
+                <h1 style="margin: 0;">{{ category.name }}</h1>
+                <div style="width: 100px;"></div> <!-- Spacer -->
+            </div>
+            
+            <div class="search-container">
+                <form action="/category/{{ category.id }}" method="get">
+                    <input type="text" name="q" class="search-bar" placeholder="Search in {{ category.name }}..." value="{{ query or '' }}">
+                    <button type="submit" class="search-icon" style="background: none; border: none; cursor: pointer;">
+                        <i data-lucide="search"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <div class="grid">
+            {% for product in products %}
+            <div class="card animate-in" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+                <span class="badge">{{ product.partition or 'General' }}</span>
+                <div class="card-title">{{ product.name }}</div>
+                <div class="card-desc">{{ product.variant }}</div>
+                <div class="price-tag">{{ product.price }} EGP</div>
+            </div>
+            {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                <i data-lucide="search-x" size="48" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-muted); font-size: 1.2rem;">No products found in this category.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn">Previous</a>
+            {% endif %}
+            
+            {% for p in range(1, total_pages + 1) %}
+            <a href="?page={{ p }}&q={{ query or '' }}" class="page-btn {{ 'active' if p == page else '' }}">{{ p }}</a>
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
