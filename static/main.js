@@ -271,7 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             audioChunks = [];
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
+            let supportedType = types.find(t => MediaRecorder.isTypeSupported(t));
+            console.log("[Mic] Using MIME type:", supportedType);
+            
+            mediaRecorder = new MediaRecorder(stream, { mimeType: supportedType });
 
             mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
 
