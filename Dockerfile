@@ -13,12 +13,17 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Redis server for local caching/memory support
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends redis-server \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy application code
 COPY . /app
 
 # Expose the port that Uvicorn will listen on
 EXPOSE 8000
 
-# Start the FastAPI app with Uvicorn.
+# Start Redis and the FastAPI app with Uvicorn.
 # Use $PORT if provided by the hosting environment.
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "redis-server --daemonize yes && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

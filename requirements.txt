@@ -21,3 +21,6 @@ pyngrok
 gTTS
 SpeechRecognition
 rapidfuzz
+fpdf2
+pymupdf
+pydantic
