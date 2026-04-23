@@ -85,8 +85,10 @@ class ChatBot:
         
         # Override models if provided
         if self._llm_model:
-            if self.local: config.LOCAL_LLM_TEXT_MODEL = self._llm_model
-            else: config.OPENAI_LLM_MODEL = self._llm_model
+            if self.local:
+                 config.LOCAL_LLM_TEXT_MODEL = self._llm_model
+            else:
+                 config.OPENAI_LLM_MODEL = self._llm_model
         
         if self._vlm_model:
             if self.local: config.LOCAL_VLM_MODEL = self._vlm_model
