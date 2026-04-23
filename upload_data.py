@@ -128,16 +128,19 @@ def upload_data(excel_file, sheet_name=None):
         df.columns = [str(c).strip() for c in df.columns]
         mapped_columns = map_columns(df)
 
-        if "name" not in mapped_columns or "price" not in mapped_columns or "category" not in mapped_columns:
-            raise ValueError(
-                "Required columns are missing. Expected at least: Product Name, Price, Category."
-            )
-
-        rows = len(df)
-        print(f"Loaded {rows} rows from '{excel_file}'.")
+        print(f"Loaded {len(df)} rows from '{excel_file}'.")
+        print(f"Available columns: {list(df.columns)}")
         print("Mapped columns:")
         for key, col in mapped_columns.items():
             print(f"  {key}: {col}")
+
+        if "name" not in mapped_columns or "price" not in mapped_columns or "category" not in mapped_columns:
+            print("Column mapping failed. Please check your Excel file has columns similar to:")
+            for key, names in COLUMN_MAP.items():
+                print(f"  {key}: {names}")
+            raise ValueError(
+                "Required columns are missing. Expected at least: Product Name, Price, Category."
+            )
 
         categories_cache = {}
         created_categories = 0
