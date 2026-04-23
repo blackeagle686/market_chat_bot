@@ -40,24 +40,23 @@ class OpenAIEmbeddings(BaseEmbeddings):
         self.client = OpenAIEmbeddings._client
 
     def _embed(self, texts: List[str]) -> List[List[float]]:
-        formatted_input = [
-            {
-                "content": [
-                    {"type": "text", "text": text}
-                ]
-            }
-            for text in texts
-        ]
-        response = self.client.embeddings.create(
-            extra_headers={
-                "HTTP-Referer": "http://localhost:8000",
-                "X-OpenRouter-Title": "MarketChatBot",
-            },
-            model="nvidia/llama-nemotron-embed-vl-1b-v2:free",
-            input=formatted_input,
-            encoding_format="float"
-        )
-        return [item.embedding for item in response.data]
+        # OpenRouter free models have strict rate limits and batch size limits.
+        # Process in smaller batches and use standard text input instead of multimodal.
+        batch_size = 10
+        all_embeddings = []
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            response = self.client.embeddings.create(
+                extra_headers={
+                    "HTTP-Referer": "http://localhost:8000",
+                    "X-OpenRouter-Title": "MarketChatBot",
+                },
+                model="nvidia/llama-nemotron-embed-vl-1b-v2:free",
+                input=batch,
+                encoding_format="float"
+            )
+            all_embeddings.extend([item.embedding for item in response.data])
+        return all_embeddings
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         return self._embed(texts)
