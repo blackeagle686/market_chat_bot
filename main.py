@@ -395,8 +395,12 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     audio_path = os.path.join(audio_dir, audio_filename)
     
     try:
+        # Detect language for gTTS (simplistic: check for Arabic characters)
+        has_arabic = any("\u0600" <= c <= "\u06FF" for c in response)
+        lang = 'ar' if has_arabic else 'en'
+        
         clean_audio_text = clean_text_for_speech(response)
-        tts = gTTS(text=clean_audio_text, lang='en')
+        tts = gTTS(text=clean_audio_text, lang=lang)
         tts.save(audio_path)
         return {"answer": response, "audio": f"/static/audio/{audio_filename}"}
     except Exception as e:
@@ -404,7 +408,7 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
         return {"answer": response}
 
 @app.post("/transcribe")
-async def transcribe(audio: UploadFile = File(...)):
+async def transcribe(audio: UploadFile = File(...), lang: str = Form("en")):
     """
     STT endpoint using Google SpeechRecognition API (Free).
     Converts uploaded WebM from browser to WAV, then extracts text.
@@ -441,9 +445,10 @@ async def transcribe(audio: UploadFile = File(...)):
             audio_data = recognizer.record(source)
 
         text = ""
-        # Use English
+        # Use appropriate language dialect
+        sr_lang = "ar-SA" if lang == "ar" else "en-US"
         try:
-            text = recognizer.recognize_google(audio_data, language="en-US")
+            text = recognizer.recognize_google(audio_data, language=sr_lang)
         except sr.UnknownValueError:
             text = ""
 
