@@ -64,9 +64,159 @@ body.light-mode {
     --btn-bg: rgba(96, 165, 250, 0.08);
     --btn-hover-text: #ffffff;
     /* Light mode specific extras */
-    --header-bg: rgba(219, 234, 254, 0.9);
-    --header-border: rgba(96, 165, 250, 0.2);
+    --header-bg: rgba(255, 255, 255, 0.8);
+    --header-border: rgba(0, 0, 0, 0.05);
     --footer-bg: rgba(219, 234, 254, 0.7);
+}
+
+/* ========================================
+   UNIFIED HEADER
+======================================== */
+.main-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.light-mode .main-header {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: transform 0.2s ease;
+}
+
+.brand:hover {
+    transform: scale(1.02);
+    color: var(--text-main);
+}
+
+.brand-icon {
+    font-size: 1.4rem;
+    color: #3b82f6;
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+.brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+    text-transform: none;
+}
+
+.header-nav {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light-mode .header-nav {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+
+.nav-link i {
+    font-size: 1.1rem;
+}
+
+.nav-link:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.light-mode .nav-link:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.nav-link.active {
+    color: #fff;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.theme-toggle-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-main);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.light-mode .theme-toggle-btn {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.light-mode .theme-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.theme-toggle-btn i {
+    font-size: 1.1rem;
+}
+
+.sun-icon { display: none; }
+.moon-icon { display: block; }
+
+.light-mode .sun-icon { display: block; }
+.light-mode .moon-icon { display: none; }
+
+@media (max-width: 768px) {
+    .brand-name { display: none; }
+    .header-container { padding: 0.7rem 1.2rem; }
+    .nav-link span { display: none; }
+    .nav-link { padding: 8px 12px; }
 }
 
 /* ========================================
