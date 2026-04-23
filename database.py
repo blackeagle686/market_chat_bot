@@ -44,5 +44,11 @@ class Product(Base):
 
     category = relationship("Category", back_populates="products")
 
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    password = Column(String) # Plain text for simplicity, as per previous discussion
+
 def init_db():
     Base.metadata.create_all(bind=engine)
