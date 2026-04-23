@@ -10,7 +10,7 @@ import uvicorn
 from gtts import gTTS
 import uuid
 from sqlalchemy.orm import Session
-from database import SessionLocal, Category, Product, init_db
+from database import SessionLocal, Category, Product, User, init_db
 from fastapi.responses import RedirectResponse
 
 def clean_text_for_speech(text: str) -> str:
@@ -207,8 +207,9 @@ async def admin_login_page(request: Request):
     return templates.TemplateResponse("admin_login.html", {"request": request})
 
 @app.post("/admin/login")
-async def admin_login(request: Request, username: str = Form(...), password: str = Form(...)):
-    if username == "admin" and password == "admin": # Simple hardcoded check
+async def admin_login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if user and user.password == password: 
         request.session["admin_logged_in"] = True
         return RedirectResponse(url="/admin/products", status_code=303)
     return templates.TemplateResponse("admin_login.html", {"request": request, "error": "Invalid credentials"})
