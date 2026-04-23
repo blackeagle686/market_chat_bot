@@ -142,6 +142,16 @@ def upload_data(excel_file, sheet_name=None):
                 "Required columns are missing. Expected at least: Product Name, Price, Category."
             )
 
+        # Show sample data for debugging
+        print("\nSample data (first 5 rows):")
+        for i in range(min(5, len(df))):
+            row = df.iloc[i]
+            print(f"Row {i+1}:")
+            for key, col in mapped_columns.items():
+                value = get_value(row, mapped_columns, key, "")
+                print(f"  {key}: '{value}'")
+            print()
+
         categories_cache = {}
         created_categories = 0
         created_products = 0
