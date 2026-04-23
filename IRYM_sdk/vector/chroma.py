@@ -1,4 +1,5 @@
 import chromadb
+import os
 from typing import Any, List, Optional
 from IRYM_sdk.vector.base import BaseVectorDB
 from IRYM_sdk.core.config import config
@@ -10,9 +11,18 @@ class ChromaVectorDB(BaseVectorDB):
         self.embedding_service = embedding_service
         self.client = None
         self.collection = None
+        self._is_ephemeral = False
 
     async def init(self):
-        self.client = chromadb.PersistentClient(path=self.persist_directory)
+        # Try to use persistent storage; fall back to ephemeral for serverless/read-only FS
+        try:
+            os.makedirs(self.persist_directory, exist_ok=True)
+            self.client = chromadb.PersistentClient(path=self.persist_directory)
+        except (OSError, PermissionError) as e:
+            # Fall back to ephemeral client for read-only filesystems (e.g., Vercel)
+            print(f"[*] Persistent storage unavailable ({e}). Using ephemeral ChromaDB.")
+            self.client = chromadb.EphemeralClient()
+            self._is_ephemeral = True
         
         # Link our embedding service to Chroma's interface if provided
         embedding_function = None
