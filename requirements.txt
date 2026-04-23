@@ -13,3 +13,4 @@ sqlalchemy
 gTTS
 SpeechRecognition
 rapidfuzz
+sentence-transformers
