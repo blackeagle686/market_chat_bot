@@ -959,12 +959,12 @@ body.light-mode .va-footer {
 /* Chat window overlay (appears when conversation starts) */
 #chat-window-container {
     position: absolute;
-    top: 80px;
-    bottom: 80px;
+    top: 40px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    width: 100%;
-    max-width: 800px;
+    width: 95%;
+    max-width: 1200px;
     background: var(--chat-bg);
     backdrop-filter: blur(20px);
     border: 1px solid var(--chat-border);
