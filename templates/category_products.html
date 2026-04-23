@@ -10,6 +10,19 @@
     /* Search result highlight — adapts per theme */
     .highlight-query { color: var(--accent-light, #60a5fa); font-weight: 700; }
     .light-mode .highlight-query { color: #6D28D9; }
+    
+    /* Product card adjustments */
+    .product-card {
+        padding-bottom: 1.5rem;
+    }
+    .view-details-btn {
+        width: 100%;
+        margin-top: 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
 </style>
 {% endblock %}
 
@@ -53,14 +66,6 @@
             <div class="product-card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s">
                 <div class="product-header">
                     <span class="badge bg-primary rounded-pill">{{ product.partition or 'General' }}</span>
-                    <div class="product-actions">
-                        <button class="action-btn" title="Add to cart" aria-label="Add to cart">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                        <button class="action-btn" title="View details" aria-label="View details">
-                            <i class="bi bi-info-circle"></i>
-                        </button>
-                    </div>
                 </div>
 
                 <div class="product-content">
@@ -90,10 +95,16 @@
                     </div>
                 </div>
 
-                <div class="product-footer">
-                    <button class="add-to-cart-btn">
-                        <i class="bi bi-plus-lg"></i>
-                        Add to Cart
+                <div class="product-footer-action mt-3">
+                    <button class="btn btn-primary view-details-btn" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#productModal"
+                            data-name="{{ product.name }}"
+                            data-price="{{ "%.2f" | format(product.price) }}"
+                            data-variant="{{ product.variant if product.variant and product.variant != 'nan' else 'N/A' }}"
+                            data-partition="{{ product.partition or 'General' }}"
+                            data-category="{{ category.name }}">
+                        <i class="bi bi-info-circle me-2"></i>View Details
                     </button>
                 </div>
             </div>
@@ -129,10 +140,92 @@
         </nav>
         {% endif %}
     </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary rounded-pill px-3 py-2" id="modal-partition">General</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="display-1 mb-3">🛒</div>
+                        <h2 class="modal-title fw-bold" id="productModalLabel">Product Name</h2>
+                        <p class="text-muted mb-0" id="modal-category">Category Name</p>
+                    </div>
+                    
+                    <div class="info-grid bg-light rounded-4 p-3 mb-4 d-flex justify-content-around text-center">
+                        <div>
+                            <p class="small text-muted mb-1">Price</p>
+                            <p class="h4 fw-bold mb-0 text-primary"><span id="modal-price">0.00</span> <small class="h6">EGP</small></p>
+                        </div>
+                        <div class="vr mx-2"></div>
+                        <div>
+                            <p class="small text-muted mb-1">Variant</p>
+                            <p class="h5 fw-semibold mb-0" id="modal-variant">N/A</p>
+                        </div>
+                    </div>
+                    
+                    <div class="product-features">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="feature-icon bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <p class="fw-bold mb-0">Quality Guaranteed</p>
+                                <p class="small text-muted mb-0">Hand-picked fresh products</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="feature-icon bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <div>
+                                <p class="fw-bold mb-0">Fast Delivery</p>
+                                <p class="small text-muted mb-0">Available for immediate guide</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="button" class="btn btn-secondary w-100 rounded-pill py-2 fw-bold" data-bs-dismiss="modal">Close Preview</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Lucide icons are no longer used here
+    document.addEventListener('DOMContentLoaded', function() {
+        const productModal = document.getElementById('productModal');
+        if (productModal) {
+            productModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                
+                // Extract info from data attributes
+                const name = button.getAttribute('data-name');
+                const price = button.getAttribute('data-price');
+                const variant = button.getAttribute('data-variant');
+                const partition = button.getAttribute('data-partition');
+                const category = button.getAttribute('data-category');
+                
+                // Update modal content
+                const modalTitle = productModal.querySelector('.modal-title');
+                const modalPrice = productModal.querySelector('#modal-price');
+                const modalVariant = productModal.querySelector('#modal-variant');
+                const modalPartition = productModal.querySelector('#modal-partition');
+                const modalCategory = productModal.querySelector('#modal-category');
+                
+                modalTitle.textContent = name;
+                modalPrice.textContent = price;
+                modalVariant.textContent = variant;
+                modalPartition.textContent = partition;
+                modalCategory.textContent = category;
+            });
+        }
+    });
 </script>
 {% endblock %}

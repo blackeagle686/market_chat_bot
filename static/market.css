@@ -514,3 +514,48 @@ body.light-mode .page-btn.active {
     .action-btn { width: 26px; height: 26px; }
     .add-to-cart-btn { padding: 0.55rem 0.7rem; font-size: 0.8rem; }
 }
+
+/* ---- Product Modal ---- */
+.modal-content {
+    background: var(--surface-solid) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    backdrop-filter: blur(20px);
+}
+
+.modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+body.light-mode .modal-header .btn-close {
+    filter: none;
+}
+
+.info-grid {
+    background: var(--search-bg) !important;
+    border: 1px solid var(--border);
+}
+
+.modal-title {
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+}
+
+.feature-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+    background: var(--badge-bg) !important;
+    color: var(--badge-color) !important;
+}
+
+.modal-footer .btn-secondary {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+
+.modal-footer .btn-secondary:hover {
+    background: var(--card-hover-bg);
+    color: var(--text);
+}
