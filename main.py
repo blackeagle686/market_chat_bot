@@ -15,6 +15,8 @@ from fastapi.responses import RedirectResponse
 
 def clean_text_for_speech(text: str) -> str:
     """Removes Markdown symbols and adds descriptive words for prices/partitions."""
+    # 0. Pre-process to remove suggestions entirely from speech
+    text = re.sub(r'\[Suggestions:.*?\]', '', text, flags=re.DOTALL | re.IGNORECASE)
     
     # 1. Handle Markdown Tables specifically for better descriptive flow
     def process_table_rows(match):
@@ -55,7 +57,7 @@ def clean_text_for_speech(text: str) -> str:
     text = re.sub(r'\bEGP\b', 'pounds', text, flags=re.IGNORECASE)
     
     # Remove remaining markdown and suggestions
-    text = re.sub(r'\[Suggestions: [^\]]+\]', '', text)
+    text = re.sub(r'\[Suggestions:.*?\]', '', text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     text = re.sub(r'`(.*?)`', r'\1', text)
     text = text.replace('|', ',')
