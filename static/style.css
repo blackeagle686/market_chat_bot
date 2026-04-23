@@ -1283,6 +1283,11 @@ body.light-mode .input-group .form-control::placeholder {
     .chat-window { padding: 16px; gap: 14px; }
     .message { font-size: 0.95rem; padding: 12px 16px; }
     
+    .message table {
+        display: block;
+        overflow-x: auto;
+    }
+    
     /* Exit Button Mobile */
     .exit-btn {
         top: 20px;
