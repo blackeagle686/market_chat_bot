@@ -34,7 +34,7 @@ class OpenAIEmbeddings(BaseEmbeddings):
         self.model_name = model_name or config.EMBEDDING_MODEL or "nvidia/llama-nemotron-embed-vl-1b-v2:free"
         if OpenAIEmbeddings._client is None:
             OpenAIEmbeddings._client = OpenAI(
-                api_key="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",
+                api_key="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",
                 base_url="https://openrouter.ai/api/v1",
             )
         self.client = OpenAIEmbeddings._client
