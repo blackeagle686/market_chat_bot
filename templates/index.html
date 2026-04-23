@@ -179,14 +179,22 @@
             }, 300);
         }
 
-        // Theme toggle
+        // Theme toggle — synced via localStorage across all pages
         document.addEventListener('DOMContentLoaded', () => {
             const themeBtn = document.getElementById('theme-toggle');
-            if (themeBtn) {
-                themeBtn.addEventListener('click', () => {
-                    document.body.classList.toggle('light-mode');
-                });
+            if (!themeBtn) return;
+
+            function applyTheme(isLight) {
+                document.body.classList.toggle('light-mode', isLight);
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
             }
+
+            // Restore saved preference
+            applyTheme(localStorage.getItem('theme') === 'light');
+
+            themeBtn.addEventListener('click', () => {
+                applyTheme(!document.body.classList.contains('light-mode'));
+            });
         });
 
         // Suggestion chip clicks

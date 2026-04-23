@@ -82,6 +82,15 @@ body {
     gap: 12px;
 }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.hidden-icon { display: none !important; }
+
 .nav-logo {
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
@@ -116,6 +125,32 @@ body {
     color: #fff;
 }
 body.light-mode .nav-back:hover {
+    background: rgba(124,58,237,0.1);
+    color: #6D28D9;
+}
+
+/* Theme toggle button in nav */
+.nav-theme-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+.nav-theme-btn:hover {
+    background: rgba(139,92,246,0.15);
+    border-color: var(--accent);
+    color: var(--accent-light);
+    transform: rotate(20deg);
+}
+body.light-mode .nav-theme-btn:hover {
     background: rgba(124,58,237,0.1);
     color: #6D28D9;
 }
