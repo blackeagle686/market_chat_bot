@@ -197,12 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
             footerText.textContent = "RECORDING...";
             transcriptPrev.textContent = "...";
             transcriptPrev.classList.add('visible');
+            userInput.placeholder = "Listening...";
         } else if (state === 'transcribing') {
             mainMicWrapper.classList.add('is-transcribing');
             chatMicBtn.classList.add('recording'); // Keep red while transcribing
             statusText.textContent = "Processing...";
             footerEq.classList.remove('active');
             footerText.textContent = "TRANSCRIBING...";
+            userInput.placeholder = "Processing...";
         }
     }
 
@@ -237,7 +239,14 @@ document.addEventListener('DOMContentLoaded', () => {
             isRecording = false;
             setRecordingUI('idle');
             const transcript = userInput.value.trim();
-            if (transcript) sendMessage(transcript);
+            userInput.placeholder = "Type your question...";
+            
+            if (transcript) {
+                // Brief delay so user sees what was transcribed
+                setTimeout(() => {
+                    sendMessage(transcript);
+                }, 800);
+            }
         };
 
         recognition.onerror = (event) => {
@@ -295,7 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.text && data.text.trim()) {
                         transcriptPrev.textContent = '"' + data.text.trim() + '"';
                         userInput.value = data.text.trim();
-                        sendMessage(userInput.value);
+                        // Brief delay so user sees what was transcribed
+                        setTimeout(() => {
+                            sendMessage(userInput.value);
+                        }, 800);
                     } else {
                         appendMessage("⚠️ Couldn't understand the audio. Please try again.", 'bot');
                     }
