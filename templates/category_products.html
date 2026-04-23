@@ -4,33 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ category.name }} — SmartShopping</title>
+    <meta name="description" content="Browse {{ category.name }} products in SmartShopping. Compare prices and find the best deals.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/market.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Apply saved theme before page renders to avoid flash -->
+    <script>
+        (function () {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.add('preload-light');
+            }
+        })();
+    </script>
+    <style>
+        /* Prevent theme flash */
+        html.preload-light body { background: #f5f3ff !important; }
+        /* Search result highlight — adapts per theme */
+        .highlight-query { color: var(--accent-light); font-weight: 700; }
+        body.light-mode .highlight-query { color: #6D28D9; }
+    </style>
 </head>
 <body>
 
-    <nav class="nav-bar">
-        <span class="nav-logo">✦ Smart Shopping</span>
-        {% if is_search %}
-        <a href="/catalog" class="nav-back">
-            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-            Back to Catalog
-        </a>
-        {% else %}
-        <a href="/catalog" class="nav-back">
-            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-            All Categories
-        </a>
-        {% endif %}
-    </nav>
+    <header>
+        <nav class="nav-bar">
+            <span class="nav-logo">✦ Smart Shopping</span>
+            <div class="nav-actions">
+                {% if is_search %}
+                <a href="/catalog" class="nav-back">
+                    <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
+                    Back to Catalog
+                </a>
+                {% else %}
+                <a href="/catalog" class="nav-back">
+                    <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
+                    All Categories
+                </a>
+                {% endif %}
+                <button id="theme-toggle" class="nav-theme-btn" title="Toggle light / dark mode" aria-label="Toggle theme">
+                    <i data-lucide="sun" style="width:17px;height:17px;" id="theme-icon-sun"></i>
+                    <i data-lucide="moon" style="width:17px;height:17px;" id="theme-icon-moon" class="hidden-icon"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
 
     <div class="container">
         <div class="page-header">
             <h1>{{ category.name }}</h1>
             <p>
                 {% if is_search %}
-                    Showing results for <strong style="color:#c4b5fd">"{{ query }}"</strong>
+                    Showing results for <span class="highlight-query">"{{ query }}"</span>
                 {% else %}
                     Browse all products in this category
                 {% endif %}
@@ -42,7 +66,7 @@
                 <input type="text" name="q" class="search-bar"
                     placeholder="{{ 'Search all products...' if is_search else 'Search in ' + category.name + '...' }}"
                     value="{{ query or '' }}">
-                <button type="submit" class="search-icon">
+                <button type="submit" class="search-icon" aria-label="Search">
                     <i data-lucide="search" style="width:20px;height:20px;"></i>
                 </button>
             </form>
@@ -50,7 +74,7 @@
 
         <div class="grid">
             {% for product in products %}
-            <div class="card animate-in" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+            <div class="card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s">
                 <span class="badge">{{ product.partition or 'General' }}</span>
                 <div class="card-title">{{ product.name }}</div>
                 {% if product.variant and product.variant != 'nan' %}
@@ -67,24 +91,46 @@
         </div>
 
         {% if total_pages > 1 %}
-        <div class="pagination">
+        <nav class="pagination" aria-label="Pagination">
             {% if page > 1 %}
-            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn">← Prev</a>
+            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn" aria-label="Previous page">← Prev</a>
             {% endif %}
 
             {% for p in range([1, page - 2] | max, [total_pages + 1, page + 3] | min) %}
-            <a href="?page={{ p }}&q={{ query or '' }}" class="page-btn {{ 'active' if p == page else '' }}">{{ p }}</a>
+            <a href="?page={{ p }}&q={{ query or '' }}"
+               class="page-btn {{ 'active' if p == page else '' }}"
+               {% if p == page %}aria-current="page"{% endif %}>{{ p }}</a>
             {% endfor %}
 
             {% if page < total_pages %}
-            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn">Next →</a>
+            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn" aria-label="Next page">Next →</a>
             {% endif %}
-        </div>
+        </nav>
         {% endif %}
     </div>
 
     <script>
         lucide.createIcons();
+
+        // ---- Theme persistence ----
+        const body = document.body;
+        const toggleBtn = document.getElementById('theme-toggle');
+        const sunIcon  = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+
+        function applyTheme(isLight) {
+            body.classList.toggle('light-mode', isLight);
+            sunIcon.style.display  = isLight ? 'none'        : 'inline-flex';
+            moonIcon.style.display = isLight ? 'inline-flex' : 'none';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        applyTheme(savedTheme === 'light');
+
+        toggleBtn.addEventListener('click', () => {
+            applyTheme(!body.classList.contains('light-mode'));
+        });
     </script>
 </body>
 </html>
