@@ -164,18 +164,24 @@
     <script>
         // --- Splash Logic ---
         function enterChat(lang) {
+            // Remove splash effects immediately
             document.body.classList.remove('splash-active');
-            document.getElementById('splash-screen').style.opacity = '0';
-            document.getElementById('splash-screen').style.transform = 'scale(1.05)';
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            splash.style.transform = 'scale(1.05)';
+            
             setTimeout(() => {
-                document.getElementById('splash-screen').classList.add('d-none');
+                splash.classList.add('d-none');
                 const ui = document.getElementById('main-ui');
                 ui.classList.remove('d-none');
+                ui.style.display = 'flex'; // Ensure flexbox layout
                 ui.style.opacity = '0';
-                setTimeout(() => { ui.style.opacity = '1'; }, 50);
+                setTimeout(() => { 
+                    ui.style.opacity = '1'; 
+                    // Set language
+                    if (lang) document.documentElement.lang = lang;
+                }, 50);
             }, 400);
-            // Store language preference
-            document.documentElement.lang = lang;
         }
 
         function exitToSplash() {
@@ -194,5 +200,19 @@
                 }, 50);
             }, 300);
         }
+
+        // Check for direct chat start from header
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('start') === 'chat') {
+                // If coming from header, bypass splash animations and go straight to chat
+                document.body.classList.remove('splash-active');
+                document.getElementById('splash-screen').classList.add('d-none');
+                const ui = document.getElementById('main-ui');
+                ui.classList.remove('d-none');
+                ui.style.opacity = '1';
+                ui.style.display = 'flex';
+            }
+        });
     </script>
 {% endblock %}

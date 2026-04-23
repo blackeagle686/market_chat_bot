@@ -38,12 +38,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Helpers ──────────────────────────────────────────────────────────────
     function showChatView() {
         chatContainer.classList.remove('d-none');
+        chatContainer.style.opacity = '1';
+        chatContainer.style.pointerEvents = 'auto';
         vaMainView.classList.add('hidden');
+        vaMainView.style.opacity = '0';
+        vaMainView.style.pointerEvents = 'none';
     }
 
     function hideChatView() {
         chatContainer.classList.add('d-none');
+        chatContainer.style.opacity = '0';
+        chatContainer.style.pointerEvents = 'none';
         vaMainView.classList.remove('hidden');
+        vaMainView.style.opacity = '1';
+        vaMainView.style.pointerEvents = 'auto';
         statusText.textContent = "Listening...";
         transcriptPrev.classList.remove('visible');
     }
