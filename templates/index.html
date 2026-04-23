@@ -70,15 +70,13 @@
 
     <!-- ===== CHAT ASSISTANT VIEW ===== -->
     <div id="main-ui" class="voice-assistant-container d-none">
-        <!-- Page Actions (Replacements for old header actions) -->
-        <div class="container py-3">
-             <button class="exit-btn" id="exit-btn" onclick="exitToSplash()">
-                <span class="icon-close">
-                    <i class="bi bi-x-lg"></i>
-                </span>
-                EXIT TO SPLASH
-            </button>
-        </div>
+        <!-- Exit to Splash Button (Fixed position via CSS) -->
+        <button class="exit-btn" id="exit-btn" onclick="exitToSplash()">
+            <span class="icon-close">
+                <i class="bi bi-x-lg"></i>
+            </span>
+            EXIT TO SPLASH
+        </button>
 
         <!-- Main Voice View -->
         <main class="va-main" id="va-main-view">
