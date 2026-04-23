@@ -27,7 +27,7 @@ def init_irym():
 
     # 3. Register Embeddings
     try:
-        from IRYM_sdk.vector.embeddings import OpenAIEmbeddings, SentenceTransformerEmbeddings
+        from IRYM_sdk.vector.embeddings import OpenAIEmbeddings
         embeddings = OpenAIEmbeddings()
     except Exception:
         from IRYM_sdk.vector.embeddings import SentenceTransformerEmbeddings
