@@ -5,11 +5,11 @@ from database import SessionLocal, Category, Product, init_db
 
 
 COLUMN_MAP = {
-    "name": ["Product Name", "Name", "product", "item", "product_name"],
+    "name": ["Product Name", "Name", "product", "item", "product_name", "Product Name (Brand)"],
     "price": ["Price (EGP)", "Price", "Unit Price", "price_egp", "price"],
-    "category": ["Category", "Section", "Group", "category", "category_name"],
+    "category": ["Category", "Section", "Group", "category", "category_name", "Unnamed: 4"],
     "partition": ["Partition", "Subcategory", "partition", "partition_name"],
-    "variant": ["Variant", "Variant Name", "variant", "option"],
+    "variant": ["Variant", "Variant Name", "variant", "option", "Brand"],
     "category_description": ["Category Description", "Category Details", "Description", "category_description"],
     "category_image": ["Image URL", "Category Image", "Image", "image_url"]
 }
