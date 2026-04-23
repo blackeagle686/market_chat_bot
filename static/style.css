@@ -45,24 +45,28 @@ body.light-mode {
     --green-glow: rgba(124, 58, 237, 0.2);
     --green-button: #6D28D9;
     --text-main: #1e1b4b;
-    --text-muted: #6b7280;
-    --chip-bg: #ffffff;
-    --chip-border: rgba(0, 0, 0, 0.08);
+    --text-muted: #4b5563;
+    --chip-bg: rgba(255, 255, 255, 0.85);
+    --chip-border: rgba(124, 58, 237, 0.15);
     --mic-icon-color: #ffffff;
-    --chat-bg: rgba(255, 255, 255, 0.95);
-    --chat-border: rgba(124, 58, 237, 0.15);
-    --chat-shadow: rgba(0,0,0,0.15);
+    --chat-bg: rgba(255, 255, 255, 0.97);
+    --chat-border: rgba(124, 58, 237, 0.2);
+    --chat-shadow: rgba(107, 33, 168, 0.12);
     --bot-msg-bg: #f5f3ff;
-    --bot-msg-border: rgba(124, 58, 237, 0.1);
+    --bot-msg-border: rgba(124, 58, 237, 0.15);
     --table-bg: #ffffff;
     --table-th-bg: #f9fafb;
-    --form-bg: #f3f0ff;
+    --form-bg: rgba(243, 240, 255, 0.95);
     --input-bg: #ffffff;
-    --input-focus-bg: #ffffff;
+    --input-focus-bg: #faf5ff;
     --input-color: #1e1b4b;
-    --msg-shadow: rgba(0,0,0,0.05);
-    --btn-bg: rgba(0, 0, 0, 0.05);
+    --msg-shadow: rgba(107, 33, 168, 0.06);
+    --btn-bg: rgba(124, 58, 237, 0.08);
     --btn-hover-text: #ffffff;
+    /* Light mode specific extras */
+    --header-bg: rgba(237, 233, 254, 0.85);
+    --header-border: rgba(124, 58, 237, 0.2);
+    --footer-bg: rgba(224, 231, 255, 0.7);
 }
 
 /* ========================================
@@ -75,8 +79,12 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    overflow: hidden;
     transition: background 0.4s ease, color 0.3s ease;
+}
+
+/* Chat page locks scroll; catalog pages should scroll freely */
+body.chat-page {
+    overflow: hidden;
 }
 
 /* ========================================
@@ -353,6 +361,11 @@ body {
     border-bottom: 1px solid rgba(139,92,246,0.2);
 }
 
+body.light-mode .voice-assistant-container .va-header {
+    background: var(--header-bg, rgba(237, 233, 254, 0.85));
+    border-bottom: 1px solid var(--header-border, rgba(124, 58, 237, 0.2));
+}
+
 .catalog-btn {
     background: rgba(139,92,246,0.2);
     color: #c4b5fd;
@@ -372,6 +385,16 @@ body {
     transform: translateY(-1px);
 }
 
+body.light-mode .catalog-btn {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6D28D9;
+    border-color: rgba(124, 58, 237, 0.3);
+}
+body.light-mode .catalog-btn:hover {
+    background: #7C3AED;
+    color: #fff;
+}
+
 .icon-btn {
     background: transparent;
     border: none;
@@ -386,6 +409,10 @@ body {
 .icon-btn:hover {
     color: var(--text-main);
     background: rgba(255,255,255,0.08);
+}
+body.light-mode .icon-btn:hover {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6D28D9;
 }
 
 .header-actions {
@@ -571,7 +598,8 @@ body.light-mode .mic-ring {
 }
 
 body.light-mode .suggestion-chip {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(107, 33, 168, 0.08);
+    border-color: rgba(124, 58, 237, 0.18);
 }
 
 .suggestion-chip svg {
@@ -583,6 +611,11 @@ body.light-mode .suggestion-chip {
     transform: translateY(-2px);
     border-color: rgba(255, 255, 255, 0.2);
 }
+body.light-mode .suggestion-chip:hover {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.35);
+    color: #1e1b4b;
+}
 
 /* Footer */
 .va-footer {
@@ -592,6 +625,10 @@ body.light-mode .suggestion-chip {
     align-items: center;
     background: linear-gradient(to top, rgba(26,10,62,0.8), transparent);
     z-index: 10;
+    flex-shrink: 0;
+}
+body.light-mode .va-footer {
+    background: var(--footer-bg, rgba(224, 231, 255, 0.7));
 }
 
 .footer-left {
@@ -723,6 +760,8 @@ body.light-mode .suggestion-chip {
 
 .chat-window::-webkit-scrollbar { width: 6px; }
 .chat-window::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+body.light-mode .chat-window::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.3); }
+body.light-mode .chat-window::-webkit-scrollbar-track { background: rgba(124, 58, 237, 0.05); }
 
 .message {
     padding: 16px 20px;
@@ -879,24 +918,38 @@ body.light-mode .suggestion-chip {
 ======================================== */
 @media (max-width: 768px) {
     /* Chat view */
-    .va-header { padding: 16px 20px; }
+    .va-header { padding: 14px 16px; }
     .va-title { display: none; }
-    .status-text { font-size: 2rem; margin-bottom: 36px; }
-    .mic-wrapper { width: 120px; height: 120px; margin-bottom: 40px; }
-    .mic-button { width: 70px; height: 70px; }
-    .inner-ring { width: 100px; height: 100px; }
-    .outer-ring { width: 120px; height: 120px; }
-    .va-footer { padding: 15px 20px; flex-direction: column; gap: 10px; }
+    .status-text { font-size: 1.8rem; margin-bottom: 28px; }
+    .mic-wrapper { width: 110px; height: 110px; margin-bottom: 32px; }
+    .mic-button { width: 66px; height: 66px; }
+    .inner-ring { width: 90px; height: 90px; }
+    .outer-ring { width: 110px; height: 110px; }
+    .va-footer { padding: 12px 16px; flex-direction: column; gap: 8px; }
+    .va-main { padding: 0 12px; }
     #chat-window-container { top: 0; bottom: 0; border-radius: 0; max-width: 100%; border: none; }
     .catalog-btn { display: none; }
+    .suggestions-row { gap: 8px; }
+    .suggestion-chip { padding: 10px 14px; font-size: 0.85rem; }
+    .chat-window { padding: 16px; gap: 14px; }
+    .message { font-size: 0.95rem; padding: 12px 16px; }
 
     /* Splash screen — stack vertically on mobile */
     .splash { flex-direction: column; padding: 20px; }
-    .robot-wrapper { width: 200px; margin-bottom: 24px; }
-    .robot-img { max-width: 180px; }
-    .lang-card { margin-left: 0; padding: 28px 24px; }
-    .lang-card-title { font-size: 1.5rem; }
-    .feature-pills { flex-direction: column; gap: 8px; align-items: center; bottom: 16px; }
+    .robot-wrapper { width: 180px; margin-bottom: 20px; }
+    .robot-img { max-width: 160px; }
+    .lang-card { margin-left: 0; padding: 24px 20px; max-width: 100%; }
+    .lang-card-title { font-size: 1.4rem; }
+    .lang-buttons { gap: 8px; }
+    .feature-pills { flex-direction: column; gap: 8px; align-items: center; bottom: 12px; }
+}
+
+@media (max-width: 480px) {
+    .lang-card { padding: 20px 16px; }
+    .lang-btn { padding: 10px 14px; font-size: 0.88rem; }
+    .status-text { font-size: 1.5rem; }
+    .footer-right .logo { font-size: 0.95rem; }
+    .footer-text { font-size: 0.65rem; }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
