@@ -57,7 +57,6 @@ def clean_text_for_speech(text: str) -> str:
     text = re.sub(r'\bEGP\b', 'pounds', text, flags=re.IGNORECASE)
     
     # Remove remaining markdown and suggestions
-    text = re.sub(r'\[Suggestions:.*?\]', '', text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     text = re.sub(r'`(.*?)`', r'\1', text)
     text = text.replace('|', ',')
