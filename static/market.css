@@ -145,14 +145,14 @@ body.light-mode .nav-back:hover {
     flex-shrink: 0;
 }
 .nav-theme-btn:hover {
-    background: rgba(139,92,246,0.15);
+    background: rgba(96,165,250,0.15);
     border-color: var(--accent);
     color: var(--accent-light);
     transform: rotate(20deg);
 }
 body.light-mode .nav-theme-btn:hover {
-    background: rgba(124,58,237,0.1);
-    color: #6D28D9;
+    background: rgba(59,130,246,0.1);
+    color: #1d4ed8;
 }
 
 /* ---- Page Container ---- */
@@ -525,17 +525,17 @@ body.light-mode .price-tag {
 .page-btn:hover {
     border-color: var(--accent);
     color: var(--accent-light);
-    background: rgba(139,92,246,0.1);
+    background: rgba(96,165,250,0.1);
     transform: translateY(-1px);
 }
 .page-btn.active {
-    background: linear-gradient(135deg, #7C3AED, #4F46E5);
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: #fff;
     border-color: transparent;
-    box-shadow: 0 4px 15px rgba(124,58,237,0.4);
+    box-shadow: 0 4px 15px rgba(59,130,246,0.4);
 }
 body.light-mode .page-btn.active {
-    box-shadow: 0 4px 15px rgba(124,58,237,0.25);
+    box-shadow: 0 4px 15px rgba(59,130,246,0.25);
 }
 
 /* ---- Empty State ---- */
