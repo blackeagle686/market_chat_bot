@@ -38,6 +38,8 @@ class Product(Base):
     price = Column(Float)
     partition = Column(String, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"))
+    rating = Column(Float, default=4.5)
+    rating_count = Column(Integer, default=1)
 
     category = relationship("Category", back_populates="products")
 
