@@ -3,39 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market Catalog - Categories</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Market Catalog — SmartShopping</title>
+    <meta name="description" content="Browse all product categories in our smart supermarket catalog.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/market.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>Explore Our Market</h1>
-            <div class="search-container">
-                <form action="/search" method="get">
-                    <input type="text" name="q" class="search-bar" placeholder="Search for products across all categories..." required>
-                    <button type="submit" class="search-icon" style="background: none; border: none; cursor: pointer;">
-                        <i data-lucide="search"></i>
-                    </button>
-                </form>
-            </div>
-        </header>
 
-        <section>
-            <h2 style="margin-bottom: 1.5rem; font-weight: 700;">Categories</h2>
-            <div class="grid">
-                {% for category in categories %}
-                <a href="/category/{{ category.id }}" class="card animate-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
-                    <div class="card-img">
-                        <i data-lucide="package" size="48"></i>
-                    </div>
-                    <div class="card-title">{{ category.name }}</div>
-                    <div class="card-desc">{{ category.products|length }} Products available</div>
-                </a>
-                {% endfor %}
+    <nav class="nav-bar">
+        <span class="nav-logo">✦ Smart Shopping</span>
+        <a href="/" class="nav-back">
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+            AI Assistant
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Explore Our Market</h1>
+            <p>Find what you need — browse by category or search directly</p>
+        </div>
+
+        <div class="search-container">
+            <form action="/search" method="get">
+                <input type="text" name="q" class="search-bar" placeholder="Search for any product across all categories..." required>
+                <button type="submit" class="search-icon">
+                    <i data-lucide="search" style="width:20px;height:20px;"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="section-title">Categories</div>
+
+        <div class="grid">
+            {% for category in categories %}
+            <a href="/category/{{ category.id }}" class="card animate-in" style="animation-delay: {{ loop.index0 * 0.08 }}s">
+                <div class="card-img">🛒</div>
+                <div class="card-title">{{ category.name }}</div>
+                <div class="card-desc">{{ category.products | length }} products available</div>
+            </a>
+            {% else %}
+            <div class="empty-state">
+                <i data-lucide="inbox" style="width:48px;height:48px;opacity:0.4"></i>
+                <p>No categories found. Please run the data migration first.</p>
             </div>
-        </section>
+            {% endfor %}
+        </div>
     </div>
 
     <script>
