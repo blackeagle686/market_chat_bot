@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ product.name }} — MarketAI Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-4">
+        <a href="/admin/products" class="btn btn-outline-primary btn-sm rounded-pill px-3 mb-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Products
+        </a>
+        <h1 class="h2 fw-bold">Edit Product</h1>
+        <p class="text-muted">Modify product information and upload high-quality images</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4" style="background: var(--surface-solid);">
+                <form action="/admin/product/edit/{{ product.id }}" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Product Name</label>
+                            <input type="text" name="name" class="form-control rounded-3 border-0 shadow-sm p-3" 
+                                   value="{{ product.name }}" required style="background: var(--search-bg); color: var(--text);">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Price (EGP)</label>
+                            <input type="number" step="0.01" name="price" class="form-control rounded-3 border-0 shadow-sm p-3" 
+                                   value="{{ product.price }}" required style="background: var(--search-bg); color: var(--text);">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Category</label>
+                            <select name="category_id" class="form-select rounded-3 border-0 shadow-sm p-3" 
+                                    style="background: var(--search-bg); color: var(--text);">
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {{ 'selected' if cat.id == product.category_id else '' }}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Variant</label>
+                            <input type="text" name="variant" class="form-control rounded-3 border-0 shadow-sm p-3" 
+                                   value="{{ product.variant or '' }}" style="background: var(--search-bg); color: var(--text);">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Partition</label>
+                            <input type="text" name="partition" class="form-control rounded-3 border-0 shadow-sm p-3" 
+                                   value="{{ product.partition or '' }}" style="background: var(--search-bg); color: var(--text);">
+                        </div>
+                        
+                        <div class="col-md-12 mt-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Product Image</label>
+                            <div class="border border-2 border-dashed rounded-4 p-4 text-center mb-3" 
+                                 style="border-color: var(--border) !important; background: var(--search-bg);">
+                                <i class="bi bi-cloud-arrow-up display-4 text-muted"></i>
+                                <p class="mt-2 mb-0 text-muted">Click to upload or drag and drop</p>
+                                <input type="file" name="image" class="form-control mt-3" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-top border-light">
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-lg">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center sticky-top" style="background: var(--surface-solid); top: 100px;">
+                <h3 class="h5 fw-bold mb-4">Current Preview</h3>
+                <div class="product-preview-img rounded-4 shadow-lg mb-3 mx-auto overflow-hidden d-flex align-items-center justify-content-center" 
+                     style="width: 200px; height: 200px; background: var(--search-bg);">
+                    {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <i class="bi bi-image display-1 text-muted"></i>
+                    {% endif %}
+                </div>
+                <p class="fw-bold mb-0">{{ product.name }}</p>
+                <p class="text-primary h4 fw-bold">{{ "%.2f" | format(product.price) }} <small class="h6">EGP</small></p>
+                <hr class="border-light opacity-10">
+                <div class="d-flex justify-content-between small text-muted px-2">
+                    <span>Variant: {{ product.variant or 'None' }}</span>
+                    <span>Rating: {{ product.rating or '4.5' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
