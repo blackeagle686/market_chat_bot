@@ -3,70 +3,70 @@
 ======================================== */
 :root {
     /* Brand Colors */
-    --purple-start: #6B21A8;
-    --purple-mid: #7C3AED;
-    --blue-end: #4F46E5;
-    --accent-violet: #8B5CF6;
-    --accent-blue: #3B82F6;
+    --purple-start: #60a5fa;
+    --purple-mid: #3b82f6;
+    --blue-end: #1d4ed8;
+    --accent-violet: #93c5fd;
+    --accent-blue: #60a5fa;
 
     /* Chat / UI Colors */
-    --bg-dark: #0d0a1e;
-    --bg-gradient-top: #1a0a3e;
-    --bg-gradient-bottom: #0a1040;
-    --green-primary: #8B5CF6;
-    --green-glow: rgba(139, 92, 246, 0.4);
-    --green-button: #7C3AED;
+    --bg-dark: #0f172a;
+    --bg-gradient-top: #0f172a;
+    --bg-gradient-bottom: #020617;
+    --green-primary: #60a5fa;
+    --green-glow: rgba(96, 165, 250, 0.35);
+    --green-button: #3b82f6;
     --text-main: #ffffff;
-    --text-muted: #a5b4fc;
-    --chip-bg: rgba(255, 255, 255, 0.07);
-    --chip-border: rgba(255, 255, 255, 0.12);
-    --mic-icon-color: #fff;
-    --chat-bg: rgba(13, 10, 30, 0.92);
-    --chat-border: rgba(139, 92, 246, 0.2);
+    --text-muted: #93c5fd;
+    --chip-bg: rgba(255, 255, 255, 0.08);
+    --chip-border: rgba(255, 255, 255, 0.14);
+    --mic-icon-color: #ffffff;
+    --chat-bg: rgba(15, 23, 42, 0.94);
+    --chat-border: rgba(96, 165, 250, 0.2);
     --chat-shadow: rgba(0,0,0,0.8);
-    --bot-msg-bg: rgba(139, 92, 246, 0.07);
+    --bot-msg-bg: rgba(96, 165, 250, 0.08);
     --bot-msg-border: transparent;
-    --table-bg: rgba(0,0,0,0.2);
+    --table-bg: rgba(15, 23, 42, 0.2);
     --table-th-bg: rgba(255,255,255,0.05);
-    --form-bg: rgba(0,0,0,0.3);
-    --input-bg: rgba(255,255,255,0.06);
-    --input-focus-bg: rgba(255,255,255,0.1);
+    --form-bg: rgba(15, 23, 42, 0.3);
+    --input-bg: rgba(255,255,255,0.08);
+    --input-focus-bg: rgba(255,255,255,0.14);
     --input-color: white;
     --msg-shadow: rgba(0,0,0,0.2);
-    --btn-bg: rgba(255, 255, 255, 0.1);
+    --btn-bg: rgba(255, 255, 255, 0.12);
     --btn-hover-text: #fff;
 }
 
 body.light-mode {
-    --bg-dark: #f5f3ff;
-    --bg-gradient-top: #ede9fe;
-    --bg-gradient-bottom: #e0e7ff;
-    --green-primary: #7C3AED;
-    --green-glow: rgba(124, 58, 237, 0.2);
-    --green-button: #6D28D9;
-    --text-main: #1e1b4b;
-    --text-muted: #4b5563;
-    --chip-bg: rgba(255, 255, 255, 0.85);
-    --chip-border: rgba(124, 58, 237, 0.15);
-    --mic-icon-color: #ffffff;
-    --chat-bg: rgba(255, 255, 255, 0.97);
-    --chat-border: rgba(124, 58, 237, 0.2);
-    --chat-shadow: rgba(107, 33, 168, 0.12);
-    --bot-msg-bg: #f5f3ff;
-    --bot-msg-border: rgba(124, 58, 237, 0.15);
+    --bg-dark: #eff6ff;
+    --bg-gradient-top: #ffffff;
+    --bg-gradient-bottom: #dbeafe;
+    --green-primary: #3b82f6;
+    --green-glow: rgba(59, 130, 246, 0.2);
+    --green-button: #2563eb;
+    --text-main: #1e293b;
+    --text-muted: #475569;
+    --chip-bg: rgba(255, 255, 255, 0.9);
+    --chip-border: rgba(96, 165, 250, 0.15);
+    --mic-icon-color: #1e293b;
+    --chat-bg: rgba(255, 255, 255, 0.98);
+    --chat-border: rgba(96, 165, 250, 0.2);
+    --chat-shadow: rgba(96, 165, 250, 0.12);
+    --bot-msg-bg: #eff6ff;
+    --bot-msg-border: rgba(96, 165, 250, 0.15);
     --table-bg: #ffffff;
-    --table-th-bg: #f9fafb;
-    --form-bg: rgba(243, 240, 255, 0.95);
+    --table-th-bg: #f8fafc;
+    --form-bg: rgba(239, 246, 255, 0.95);
     --input-bg: #ffffff;
-    --input-focus-bg: #faf5ff;
-    --input-color: #1e1b4b;
-    --msg-shadow: rgba(107, 33, 168, 0.06);
-    --btn-bg: rgba(124, 58, 237, 0.08);
+    --input-focus-bg: #eff6ff;
+    --input-color: #1e293b;
+    --msg-shadow: rgba(96, 165, 250, 0.06);
+    --btn-bg: rgba(96, 165, 250, 0.08);
     --btn-hover-text: #ffffff;
     /* Light mode specific extras */
-    --header-bg: rgba(237, 233, 254, 0.85);
-    --header-border: rgba(124, 58, 237, 0.2);
-    --footer-bg: rgba(224, 231, 255, 0.7);
+    --header-bg: rgba(219, 234, 254, 0.9);
+    --header-border: rgba(96, 165, 250, 0.2);
+    --footer-bg: rgba(219, 234, 254, 0.7);
 }
 
 /* ========================================
@@ -104,7 +104,7 @@ body.chat-page {
 .splash-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(125deg, #6B21A8 0%, #7C3AED 40%, #4338CA 70%, #3B82F6 100%);
+    background: linear-gradient(125deg, #60a5fa 0%, #3b82f6 40%, #1d4ed8 70%, #ffffff 100%);
     z-index: 0;
 }
 
@@ -118,7 +118,7 @@ body.chat-page {
 }
 .splash-bg::before {
     width: 400px; height: 400px;
-    background: rgba(139, 92, 246, 0.35);
+    background: rgba(96, 165, 250, 0.35);
     top: -100px; left: -100px;
 }
 .splash-bg::after {
@@ -156,7 +156,7 @@ body.chat-page {
     left: 50%;
     transform: translateX(-50%);
     width: 200px; height: 30px;
-    background: radial-gradient(ellipse, rgba(139,92,246,0.5) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(96,165,250,0.45) 0%, transparent 70%);
     filter: blur(10px);
 }
 
@@ -191,7 +191,7 @@ body.chat-page {
 
 .lang-card-sparkle {
     font-size: 2rem;
-    color: #7C3AED;
+    color: #3b82f6;
     margin-bottom: 12px;
     display: block;
     animation: twinkle 2s ease-in-out infinite;
@@ -248,23 +248,23 @@ body.chat-page {
 }
 
 .lang-btn-primary {
-    background: linear-gradient(135deg, #7C3AED, #4F46E5);
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
     color: white;
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
 }
 .lang-btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+    box-shadow: 0 8px 25px rgba(96, 165, 250, 0.5);
 }
 
 .lang-btn-outline {
     background: transparent;
-    color: #7C3AED;
-    border-color: #d8b4fe;
+    color: #3b82f6;
+    border-color: #bfdbfe;
 }
 .lang-btn-outline:hover {
-    background: #f5f3ff;
-    border-color: #7C3AED;
+    background: #eff6ff;
+    border-color: #3b82f6;
     transform: translateY(-2px);
 }
 
@@ -369,22 +369,22 @@ body.light-mode .va-title {
     color: var(--text-main);
 }
 
-/* Chat View Header — purple gradient glass bar */
+/* Chat View Header — blue gradient glass bar */
 .voice-assistant-container .va-header {
-    background: linear-gradient(135deg, rgba(107,33,168,0.4), rgba(79,70,229,0.3));
+    background: linear-gradient(135deg, rgba(96,165,250,0.35), rgba(59,130,246,0.22));
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(139,92,246,0.2);
+    border-bottom: 1px solid rgba(96,165,250,0.2);
 }
 
 body.light-mode .voice-assistant-container .va-header {
-    background: var(--header-bg, rgba(237, 233, 254, 0.85));
-    border-bottom: 1px solid var(--header-border, rgba(124, 58, 237, 0.2));
+    background: var(--header-bg, rgba(219, 234, 254, 0.85));
+    border-bottom: 1px solid var(--header-border, rgba(96,165,250,0.2));
 }
 
 .catalog-btn {
-    background: rgba(139,92,246,0.2);
-    color: #c4b5fd;
-    border: 1px solid rgba(139,92,246,0.4);
+    background: rgba(96,165,250,0.18);
+    color: #bfdbfe;
+    border: 1px solid rgba(96,165,250,0.35);
     border-radius: 20px;
     padding: 6px 16px;
     font-size: 0.78rem;
@@ -395,18 +395,18 @@ body.light-mode .voice-assistant-container .va-header {
     margin-right: 10px;
 }
 .catalog-btn:hover {
-    background: rgba(139,92,246,0.4);
+    background: rgba(59,130,246,0.35);
     color: #fff;
     transform: translateY(-1px);
 }
 
 body.light-mode .catalog-btn {
-    background: rgba(124, 58, 237, 0.1);
-    color: #6D28D9;
-    border-color: rgba(124, 58, 237, 0.3);
+    background: rgba(59,130,246,0.12);
+    color: #1d4ed8;
+    border-color: rgba(96,165,250,0.3);
 }
 body.light-mode .catalog-btn:hover {
-    background: #7C3AED;
+    background: #3b82f6;
     color: #fff;
 }
 
@@ -460,7 +460,7 @@ body.light-mode .icon-btn:hover {
     font-weight: 800;
     letter-spacing: -1px;
     margin-bottom: 50px;
-    background: linear-gradient(135deg, #c4b5fd, #818cf8);
+    background: linear-gradient(135deg, #bfdbfe, #60a5fa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     transition: all 0.3s ease;
@@ -512,7 +512,7 @@ body.light-mode .icon-btn:hover {
 }
 
 body.light-mode .mic-ring {
-    background: rgba(124, 58, 237, 0.18);
+    background: rgba(59, 130, 246, 0.18);
     opacity: 0.6;
 }
 
@@ -613,8 +613,8 @@ body.light-mode .mic-ring {
 }
 
 body.light-mode .suggestion-chip {
-    box-shadow: 0 4px 15px rgba(107, 33, 168, 0.08);
-    border-color: rgba(124, 58, 237, 0.18);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.08);
+    border-color: rgba(96, 165, 250, 0.18);
 }
 
 .suggestion-chip svg {
@@ -627,8 +627,8 @@ body.light-mode .suggestion-chip {
     border-color: rgba(255, 255, 255, 0.2);
 }
 body.light-mode .suggestion-chip:hover {
-    background: rgba(124, 58, 237, 0.08);
-    border-color: rgba(124, 58, 237, 0.35);
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.35);
     color: #1e1b4b;
 }
 
