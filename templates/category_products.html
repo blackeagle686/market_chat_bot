@@ -1,56 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ category.name }} — SmartShopping</title>
-    <meta name="description" content="Browse {{ category.name }} products in SmartShopping. Compare prices and find the best deals.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/market.css">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <!-- Apply saved theme before page renders to avoid flash -->
-    <script>
-        (function () {
-            if (localStorage.getItem('theme') === 'light') {
-                document.documentElement.classList.add('preload-light');
-            }
-        })();
-    </script>
-    <style>
-        /* Prevent theme flash */
-        html.preload-light body { background: #f5f3ff !important; }
-        /* Search result highlight — adapts per theme */
-        .highlight-query { color: var(--accent-light); font-weight: 700; }
-        body.light-mode .highlight-query { color: #6D28D9; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
-        <nav class="nav-bar">
-            <span class="nav-logo">✦ Smart Shopping</span>
-            <div class="nav-actions">
+{% set use_market_css = True %}
+
+{% block title %}{{ category.name }} — SmartShopping{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* Search result highlight — adapts per theme */
+    .highlight-query { color: var(--accent-light, #60a5fa); font-weight: 700; }
+    .light-mode .highlight-query { color: #6D28D9; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="page-header">
+            <div class="d-flex align-items-center gap-3 mb-2">
                 {% if is_search %}
-                <a href="/catalog" class="nav-back">
-                    <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
-                    Back to Catalog
+                <a href="/catalog" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <i class="bi bi-arrow-left"></i> Back
                 </a>
                 {% else %}
-                <a href="/catalog" class="nav-back">
-                    <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
-                    All Categories
+                <a href="/catalog" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <i class="bi bi-grid"></i> All Categories
                 </a>
                 {% endif %}
-                <button id="theme-toggle" class="nav-theme-btn" title="Toggle light / dark mode" aria-label="Toggle theme">
-                    <i data-lucide="sun" style="width:17px;height:17px;" id="theme-icon-sun"></i>
-                    <i data-lucide="moon" style="width:17px;height:17px;" id="theme-icon-moon" class="hidden-icon"></i>
-                </button>
             </div>
-        </nav>
-    </header>
-
-    <div class="container">
-        <div class="page-header">
             <h1>{{ category.name }}</h1>
             <p>
                 {% if is_search %}
@@ -67,7 +43,7 @@
                     placeholder="{{ 'Search all products...' if is_search else 'Search in ' + category.name + '...' }}"
                     value="{{ query or '' }}">
                 <button type="submit" class="search-icon" aria-label="Search">
-                    <i data-lucide="search" style="width:20px;height:20px;"></i>
+                    <i class="bi bi-search"></i>
                 </button>
             </form>
         </div>
@@ -76,13 +52,13 @@
             {% for product in products %}
             <div class="product-card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s">
                 <div class="product-header">
-                    <span class="badge">{{ product.partition or 'General' }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ product.partition or 'General' }}</span>
                     <div class="product-actions">
                         <button class="action-btn" title="Add to cart" aria-label="Add to cart">
-                            <i data-lucide="shopping-cart" style="width:16px;height:16px;"></i>
+                            <i class="bi bi-cart-plus"></i>
                         </button>
                         <button class="action-btn" title="View details" aria-label="View details">
-                            <i data-lucide="info" style="width:16px;height:16px;"></i>
+                            <i class="bi bi-info-circle"></i>
                         </button>
                     </div>
                 </div>
@@ -92,7 +68,7 @@
 
                     {% if product.variant and product.variant != 'nan' %}
                     <div class="product-variant">
-                        <i data-lucide="tag" style="width:14px;height:14px;"></i>
+                        <i class="bi bi-tag"></i>
                         {{ product.variant }}
                     </div>
                     {% endif %}
@@ -104,11 +80,11 @@
 
                     <div class="product-meta">
                         <div class="meta-item">
-                            <i data-lucide="package" style="width:12px;height:12px;"></i>
+                            <i class="bi bi-box-seam"></i>
                             <span>In Stock</span>
                         </div>
                         <div class="meta-item">
-                            <i data-lucide="star" style="width:12px;height:12px;"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
                             <span>4.5</span>
                         </div>
                     </div>
@@ -116,60 +92,47 @@
 
                 <div class="product-footer">
                     <button class="add-to-cart-btn">
-                        <i data-lucide="plus" style="width:14px;height:14px;"></i>
+                        <i class="bi bi-plus-lg"></i>
                         Add to Cart
                     </button>
                 </div>
             </div>
             {% else %}
-            <div class="empty-state">
-                <i data-lucide="search-x" style="width:48px;height:48px;opacity:0.4"></i>
+            <div class="empty-state py-5">
+                <i class="bi bi-search-heart" style="font-size: 3rem; opacity: 0.4"></i>
                 <p>No products found. Try a different search term.</p>
             </div>
             {% endfor %}
         </div>
 
         {% if total_pages > 1 %}
-        <nav class="pagination" aria-label="Pagination">
-            {% if page > 1 %}
-            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn" aria-label="Previous page">← Prev</a>
-            {% endif %}
+        <nav class="pagination-nav mt-5" aria-label="Pagination">
+            <div class="pagination d-flex justify-content-center gap-2">
+                {% if page > 1 %}
+                <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-btn">
+                    <i class="bi bi-chevron-left"></i> Prev
+                </a>
+                {% endif %}
 
-            {% for p in range([1, page - 2] | max, [total_pages + 1, page + 3] | min) %}
-            <a href="?page={{ p }}&q={{ query or '' }}"
-               class="page-btn {{ 'active' if p == page else '' }}"
-               {% if p == page %}aria-current="page"{% endif %}>{{ p }}</a>
-            {% endfor %}
+                {% for p in range([1, page - 2] | max, [total_pages + 1, page + 3] | min) %}
+                <a href="?page={{ p }}&q={{ query or '' }}"
+                   class="page-btn {{ 'active' if p == page else '' }}"
+                   {% if p == page %}aria-current="page"{% endif %}>{{ p }}</a>
+                {% endfor %}
 
-            {% if page < total_pages %}
-            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn" aria-label="Next page">Next →</a>
-            {% endif %}
+                {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-btn">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
         </nav>
         {% endif %}
     </div>
+{% endblock %}
 
-    <script>
-        lucide.createIcons();
-
-        // ---- Theme persistence ----
-        const body = document.body;
-        const toggleBtn = document.getElementById('theme-toggle');
-        const sunIcon  = document.getElementById('theme-icon-sun');
-        const moonIcon = document.getElementById('theme-icon-moon');
-
-        function applyTheme(isLight) {
-            body.classList.toggle('light-mode', isLight);
-            sunIcon.style.display  = isLight ? 'none'        : 'inline-flex';
-            moonIcon.style.display = isLight ? 'inline-flex' : 'none';
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        }
-
-        const savedTheme = localStorage.getItem('theme');
-        applyTheme(savedTheme === 'light');
-
-        toggleBtn.addEventListener('click', () => {
-            applyTheme(!body.classList.contains('light-mode'));
-        });
-    </script>
-</body>
-</html>
+{% block scripts %}
+<script>
+    // Lucide icons are no longer used here
+</script>
+{% endblock %}

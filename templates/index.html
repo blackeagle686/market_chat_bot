@@ -1,16 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Shopping — MarketAI</title>
-    <meta name="description" content="Your AI assistant inside the supermarket. Voice & Image search powered by AI.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body class="chat-page">
+{% extends "base.html" %}
 
+{% block title %}Smart Shopping — MarketAI{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* Hide site header when splash is active */
+    #site-header {
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    .splash-active #site-header {
+        transform: translateY(-100%);
+        opacity: 0;
+        pointer-events: none;
+    }
+    
+    /* Adjust main UI to account for site header */
+    .voice-assistant-container {
+        padding-top: 0;
+    }
+    
+    /* Existing custom header override for index page if needed */
+    .index-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block body_class %}chat-page splash-active{% endblock %}
+
+{% block content %}
     <!-- ===== SPLASH SCREEN ===== -->
     <div id="splash-screen" class="splash">
         <div class="splash-bg"></div>
@@ -49,27 +70,15 @@
 
     <!-- ===== CHAT ASSISTANT VIEW ===== -->
     <div id="main-ui" class="voice-assistant-container d-none">
-        <!-- Header -->
-        <header class="va-header" role="banner">
-            <div class="header-left">
-                <button class="exit-btn" id="exit-btn" onclick="exitToSplash()">
-                    <span class="icon-close">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </span>
-                    EXIT
-                </button>
-                <div class="header-brand">
-                    <div class="va-title">MARKET AI</div>
-                    <div class="va-subtitle">Your intelligent shopping guide</div>
-                </div>
-            </div>
-            <div class="header-actions">
-                <a href="/catalog" class="catalog-btn">📦 Catalog</a>
-                <button id="theme-toggle" class="icon-btn" title="Toggle theme">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                </button>
-            </div>
-        </header>
+        <!-- Page Actions (Replacements for old header actions) -->
+        <div class="container py-3">
+             <button class="exit-btn" id="exit-btn" onclick="exitToSplash()">
+                <span class="icon-close">
+                    <i class="bi bi-x-lg"></i>
+                </span>
+                EXIT TO SPLASH
+            </button>
+        </div>
 
         <!-- Main Voice View -->
         <main class="va-main" id="va-main-view">
@@ -92,17 +101,17 @@
                 <div class="suggestions-label">TRY ASKING</div>
                 <div class="suggestions-row">
                     <button class="suggestion-chip">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <i class="bi bi-search"></i>
                         Where is the cheapest olive oil?
                     </button>
                     <button class="suggestion-chip">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                        <i class="bi bi-box-seam"></i>
                         Is the fresh salmon in stock?
                     </button>
                 </div>
                 <div class="suggestions-row">
                     <button class="suggestion-chip">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        <i class="bi bi-geo-alt"></i>
                         Find organic kale in Aisle 4
                     </button>
                 </div>
@@ -112,7 +121,9 @@
         <!-- Chat Overlay -->
         <div id="chat-window-container" class="d-none">
             <div class="chat-header-inner">
-                <button id="close-chat-btn" class="close-chat">← Back to Voice</button>
+                <button id="close-chat-btn" class="close-chat">
+                    <i class="bi bi-arrow-left"></i> Back to Voice
+                </button>
             </div>
             <div id="chat-window" class="chat-window"></div>
             <form id="chat-form" class="hidden-chat-form">
@@ -147,14 +158,13 @@
             </div>
         </footer>
     </div>
+{% endblock %}
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="/static/main.js"></script>
+{% block scripts %}
     <script>
         // --- Splash Logic ---
         function enterChat(lang) {
+            document.body.classList.remove('splash-active');
             document.getElementById('splash-screen').style.opacity = '0';
             document.getElementById('splash-screen').style.transform = 'scale(1.05)';
             setTimeout(() => {
@@ -169,6 +179,7 @@
         }
 
         function exitToSplash() {
+            document.body.classList.add('splash-active');
             const ui = document.getElementById('main-ui');
             ui.style.opacity = '0';
             setTimeout(() => {
@@ -183,9 +194,5 @@
                 }, 50);
             }, 300);
         }
-
-        // Theme toggle and suggestion handling are managed in /static/main.js
-        // (This page keeps splash and exit behavior here.)
     </script>
-</body>
-</html>
+{% endblock %}

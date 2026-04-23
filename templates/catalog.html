@@ -1,45 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market Catalog — SmartShopping</title>
-    <meta name="description" content="Browse all product categories in our smart supermarket catalog. Find prices, variants, and availability instantly.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/market.css">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <!-- Apply saved theme before page renders to avoid flash -->
-    <script>
-        (function () {
-            if (localStorage.getItem('theme') === 'light') {
-                document.documentElement.classList.add('preload-light');
-            }
-        })();
-    </script>
-    <style>
-        /* Prevent theme flash */
-        html.preload-light body { background: #f5f3ff !important; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
-        <nav class="nav-bar">
-            <span class="nav-logo">✦ Smart Shopping</span>
-            <div class="nav-actions">
-                <a href="/" class="nav-back">
-                    <i data-lucide="message-circle" style="width:15px;height:15px;"></i>
-                    AI Assistant
-                </a>
-                <button id="theme-toggle" class="nav-theme-btn" title="Toggle light / dark mode" aria-label="Toggle theme">
-                    <i data-lucide="sun" style="width:17px;height:17px;" id="theme-icon-sun"></i>
-                    <i data-lucide="moon" style="width:17px;height:17px;" id="theme-icon-moon" class="hidden-icon"></i>
-                </button>
-            </div>
-        </nav>
-    </header>
+{% set use_market_css = True %}
 
-    <div class="container">
+{% block title %}Market Catalog — SmartShopping{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* Prevent theme flash */
+    html.preload-light body { background: #f5f3ff !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
         <div class="page-header">
             <h1>Explore Our Market</h1>
             <p>Find what you need — browse by category or search directly</p>
@@ -49,7 +23,7 @@
             <form action="/search" method="get">
                 <input type="text" name="q" class="search-bar" placeholder="Search for any product across all categories..." required>
                 <button type="submit" class="search-icon" aria-label="Search">
-                    <i data-lucide="search" style="width:20px;height:20px;"></i>
+                    <i class="bi bi-search"></i>
                 </button>
             </form>
         </div>
@@ -65,36 +39,16 @@
             </a>
             {% else %}
             <div class="empty-state">
-                <i data-lucide="inbox" style="width:48px;height:48px;opacity:0.4"></i>
+                <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.4"></i>
                 <p>No categories found. Please run the data migration first.</p>
             </div>
             {% endfor %}
         </div>
     </div>
+{% endblock %}
 
-    <script>
-        lucide.createIcons();
-
-        // ---- Theme persistence ----
-        const body = document.body;
-        const toggleBtn = document.getElementById('theme-toggle');
-        const sunIcon  = document.getElementById('theme-icon-sun');
-        const moonIcon = document.getElementById('theme-icon-moon');
-
-        function applyTheme(isLight) {
-            body.classList.toggle('light-mode', isLight);
-            sunIcon.style.display  = isLight ? 'none'   : 'inline-flex';
-            moonIcon.style.display = isLight ? 'inline-flex' : 'none';
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        }
-
-        // Load saved preference
-        const savedTheme = localStorage.getItem('theme');
-        applyTheme(savedTheme === 'light');
-
-        toggleBtn.addEventListener('click', () => {
-            applyTheme(!body.classList.contains('light-mode'));
-        });
-    </script>
-</body>
-</html>
+{% block scripts %}
+<script>
+    // Lucide icons are no longer used here, we switched to Bootstrap Icons in the template
+</script>
+{% endblock %}
