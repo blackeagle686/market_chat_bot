@@ -86,13 +86,15 @@ class ChatBot:
         # Override models if provided
         if self._llm_model:
             if self.local:
-                 config.LOCAL_LLM_TEXT_MODEL = self._llm_model
+                config.LOCAL_LLM_TEXT_MODEL = self._llm_model
             else:
-                 config.OPENAI_LLM_MODEL = self._llm_model
+                config.OPENAI_LLM_MODEL = self._llm_model
         
         if self._vlm_model:
-            if self.local: config.LOCAL_VLM_MODEL = self._vlm_model
-            else: config.OPENAI_VLM_MODEL = self._vlm_model
+            if self.local:
+                config.LOCAL_VLM_MODEL = self._vlm_model
+            else:
+                config.OPENAI_VLM_MODEL = self._vlm_model
             
         # Apply OpenAI Credentials if provided
         if self._openai_key:
