@@ -306,7 +306,18 @@ body.chat-page {
     justify-content: space-between;
     align-items: center;
     padding: 30px 40px;
+    position: relative;
     z-index: 10;
+}
+
+.header-section {
+    display: flex;
+    align-items: center;
+}
+
+.header-center {
+    flex: 1;
+    justify-content: center;
 }
 
 .exit-btn {
@@ -345,14 +356,17 @@ body.chat-page {
 }
 
 .va-title {
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    color: var(--text-main);
+    font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
+    transform: none;
+}
+
+body.light-mode .va-title {
+    color: var(--text-main);
 }
 
 /* Chat View Header — purple gradient glass bar */
@@ -498,8 +512,8 @@ body.light-mode .icon-btn:hover {
 }
 
 body.light-mode .mic-ring {
-    background: #6ee7b7; /* Light mint green for the big circle */
-    opacity: 1; /* Make it solid like the image */
+    background: rgba(124, 58, 237, 0.18);
+    opacity: 0.6;
 }
 
 .inner-ring {
