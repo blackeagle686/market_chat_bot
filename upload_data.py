@@ -160,6 +160,15 @@ def upload_data(excel_file, sheet_name=None):
         for index, row in df.iterrows():
             category_name = str(get_value(row, mapped_columns, "category", "")).strip()
             if not category_name:
+                # If no category specified, try to infer from partition or set default
+                partition = str(get_value(row, mapped_columns, "partition", "")).strip()
+                if partition:
+                    category_name = f"Partition {partition}"
+                else:
+                    category_name = "General"  # Default category
+
+            if not category_name:
+                print(f"Skipping row {index+1}: no category found")
                 continue
 
             if category_name in categories_cache:
