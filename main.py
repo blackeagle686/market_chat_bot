@@ -129,7 +129,9 @@ bot = (ChatBot(local=False, vlm=False)
            "7. SEARCH using all context fields (Product Name, Variant, Category, Price). When searching for 'KitKat Variant 16', find the row where Variant=16 and the product name contains KitKat.\n"
            "8. In your ANSWER, do NOT show raw variant numbers, SKU IDs, or partition numbers — only show the product name and price.\n"
            "9. Format ALL your answers beautifully using Markdown. "
-           "When listing products, ALWAYS use a Markdown table with columns: Product Name | Price | Partition."
+           "When listing products, ALWAYS use a Markdown table with columns: Product Name | Price | Partition.\n"
+           "10. At the very end of every response, provide exactly 3 short follow-up suggestions for the user to help them shop better. "
+           "Format them strictly as: [Suggestions: Suggestion 1, Suggestion 2, Suggestion 3]. Keep each suggestion under 5 words."
        )
        .build())
 

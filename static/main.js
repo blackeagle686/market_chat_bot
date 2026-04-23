@@ -82,13 +82,45 @@ document.addEventListener('DOMContentLoaded', () => {
             msgDiv.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
         } else {
             const citationRegex = /\[Source: ([^\]]+)\]/g;
+            const suggestionRegex = /\[Suggestions: ([^\]]+)\]/;
+            
             let processedText = text.replace(citationRegex, '<span class="source-tag">Source: $1</span>');
+            
+            // Extract suggestions
+            const sMatch = processedText.match(suggestionRegex);
+            let suggestions = [];
+            if (sMatch) {
+                suggestions = sMatch[1].split(',').map(s => s.trim());
+                processedText = processedText.replace(suggestionRegex, '');
+            }
+
             msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(processedText) : processedText;
+            
+            if (suggestions.length > 0) {
+                renderSuggestions(suggestions, msgDiv);
+            }
         }
 
         chatWindow.appendChild(msgDiv);
         chatWindow.scrollTop = chatWindow.scrollHeight;
         return msgDiv;
+    }
+
+    function renderSuggestions(suggestions, msgElement) {
+        if (!suggestions || suggestions.length === 0) return;
+        
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.className = 'msg-suggestions';
+        
+        suggestions.forEach(text => {
+            const chip = document.createElement('button');
+            chip.className = 'suggestion-chip';
+            chip.innerHTML = `<i class="bi bi-stars"></i> ${text}`;
+            chip.onclick = () => sendMessage(text);
+            suggestionsDiv.appendChild(chip);
+        });
+        
+        msgElement.appendChild(suggestionsDiv);
     }
 
     function processTableActions(msgElement) {
