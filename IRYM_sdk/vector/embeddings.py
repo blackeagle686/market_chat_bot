@@ -49,6 +49,10 @@ class OpenAIEmbeddings(BaseEmbeddings):
             for text in texts
         ]
         response = self.client.embeddings.create(
+            extra_headers={
+                "HTTP-Referer": "http://localhost:8000",
+                "X-OpenRouter-Title": "MarketChatBot",
+            },
             model="nvidia/llama-nemotron-embed-vl-1b-v2:free",
             input=formatted_input,
             encoding_format="float"
