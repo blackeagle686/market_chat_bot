@@ -74,13 +74,52 @@
 
         <div class="grid">
             {% for product in products %}
-            <div class="card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s">
-                <span class="badge">{{ product.partition or 'General' }}</span>
-                <div class="card-title">{{ product.name }}</div>
-                {% if product.variant and product.variant != 'nan' %}
-                <div class="card-desc">Variant: {{ product.variant }}</div>
-                {% endif %}
-                <div class="price-tag">{{ "%.2f" | format(product.price) }} EGP</div>
+            <div class="product-card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s">
+                <div class="product-header">
+                    <span class="badge">{{ product.partition or 'General' }}</span>
+                    <div class="product-actions">
+                        <button class="action-btn" title="Add to cart" aria-label="Add to cart">
+                            <i data-lucide="shopping-cart" style="width:16px;height:16px;"></i>
+                        </button>
+                        <button class="action-btn" title="View details" aria-label="View details">
+                            <i data-lucide="info" style="width:16px;height:16px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="product-content">
+                    <h3 class="product-title">{{ product.name }}</h3>
+
+                    {% if product.variant and product.variant != 'nan' %}
+                    <div class="product-variant">
+                        <i data-lucide="tag" style="width:14px;height:14px;"></i>
+                        {{ product.variant }}
+                    </div>
+                    {% endif %}
+
+                    <div class="product-price">
+                        <span class="price-amount">{{ "%.2f" | format(product.price) }}</span>
+                        <span class="price-currency">EGP</span>
+                    </div>
+
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <i data-lucide="package" style="width:12px;height:12px;"></i>
+                            <span>In Stock</span>
+                        </div>
+                        <div class="meta-item">
+                            <i data-lucide="star" style="width:12px;height:12px;"></i>
+                            <span>4.5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-footer">
+                    <button class="add-to-cart-btn">
+                        <i data-lucide="plus" style="width:14px;height:14px;"></i>
+                        Add to Cart
+                    </button>
+                </div>
             </div>
             {% else %}
             <div class="empty-state">
