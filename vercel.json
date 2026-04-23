@@ -1,6 +1,4 @@
 {
-  "buildCommand": "pip install -r requirements.txt",
-  "runtime": "python@3.12",
   "env": {
     "DATABASE_URL": "sqlite:///:memory:",
     "PYTHONUNBUFFERED": "1"
