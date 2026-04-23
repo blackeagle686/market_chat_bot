@@ -559,3 +559,41 @@ body.light-mode .modal-header .btn-close {
     background: var(--card-hover-bg);
     color: var(--text);
 }
+
+/* ---- Star Ratings ---- */
+.star-rating {
+    color: #ffc107;
+    display: flex;
+    gap: 2px;
+}
+
+.star-rating-interactive {
+    cursor: pointer;
+    font-size: 2rem;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.star-rating-interactive i {
+    transition: transform 0.2s ease, color 0.2s ease;
+    color: var(--text-muted);
+}
+
+.star-rating-interactive i.bi-star-fill {
+    color: #ffc107;
+}
+
+.star-rating-interactive i:hover {
+    transform: scale(1.2);
+}
+
+.rating-section {
+    border: 1px solid var(--border);
+    background: var(--search-bg);
+}
+
+#modal-rating-display {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text);
+}
