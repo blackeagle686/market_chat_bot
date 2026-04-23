@@ -88,6 +88,22 @@ def get_db():
 @app.on_event("startup")
 async def startup_event():
     init_db() # Ensure tables are created
+    
+    # Simple migration: add rating columns if they don't exist
+    db = SessionLocal()
+    try:
+        from sqlalchemy import text
+        db.execute(text("ALTER TABLE products ADD COLUMN rating FLOAT DEFAULT 4.5"))
+        db.execute(text("ALTER TABLE products ADD COLUMN rating_count INTEGER DEFAULT 1"))
+        db.commit()
+        print("[+] Database migrated with rating columns.")
+    except Exception:
+        db.rollback()
+        # Columns probably already exist
+        pass
+    finally:
+        db.close()
+
     global PRODUCT_CATALOG
     try:
         import pandas as pd
@@ -155,6 +171,25 @@ async def global_search(request: Request, q: str, page: int = 1, db: Session = D
         "query": q,
         "is_search": True
     })
+
+@app.post("/rate/{product_id}")
+async def rate_product(product_id: int, rating: int = Form(...), db: Session = Depends(get_db)):
+    if not (1 <= rating <= 5):
+        return JSONResponse({"error": "Rating must be between 1 and 5"}, status_code=400)
+    
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return JSONResponse({"error": "Product not found"}, status_code=404)
+    
+    # Calculate new average rating
+    new_count = (product.rating_count or 0) + 1
+    new_rating = ((product.rating or 0.0) * (product.rating_count or 0) + rating) / new_count
+    
+    product.rating = round(new_rating, 1)
+    product.rating_count = new_count
+    
+    db.commit()
+    return {"new_rating": product.rating, "new_count": product.rating_count}
 
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):

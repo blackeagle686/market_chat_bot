@@ -23,6 +23,27 @@
         letter-spacing: 0.5px;
         transition: all 0.3s ease;
     }
+    
+    /* Rating Stars */
+    .star-rating {
+        color: #ffc107;
+        display: flex;
+        gap: 2px;
+    }
+    .star-rating-interactive {
+        cursor: pointer;
+        font-size: 2rem;
+        justify-content: center;
+    }
+    .star-rating-interactive i {
+        transition: transform 0.2s ease;
+    }
+    .star-rating-interactive i:hover {
+        transform: scale(1.2);
+    }
+    .star-rating-interactive i.bi-star {
+        color: var(--text-muted);
+    }
 </style>
 {% endblock %}
 
@@ -63,7 +84,7 @@
 
         <div class="grid">
             {% for product in products %}
-            <div class="product-card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s">
+            <div class="product-card animate-in" style="animation-delay: {{ loop.index0 * 0.04 }}s" id="product-card-{{ product.id }}">
                 <div class="product-header">
                     <span class="badge bg-primary rounded-pill">{{ product.partition or 'General' }}</span>
                 </div>
@@ -89,8 +110,10 @@
                             <span>In Stock</span>
                         </div>
                         <div class="meta-item">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <span>4.5</span>
+                            <div class="star-rating me-1">
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <span class="rating-value">{{ product.rating or '4.5' }}</span>
                         </div>
                     </div>
                 </div>
@@ -99,11 +122,13 @@
                     <button class="btn btn-primary view-details-btn" 
                             data-bs-toggle="modal" 
                             data-bs-target="#productModal"
+                            data-id="{{ product.id }}"
                             data-name="{{ product.name }}"
                             data-price="{{ "%.2f" | format(product.price) }}"
                             data-variant="{{ product.variant if product.variant and product.variant != 'nan' else 'N/A' }}"
                             data-partition="{{ product.partition or 'General' }}"
-                            data-category="{{ category.name }}">
+                            data-category="{{ category.name }}"
+                            data-rating="{{ product.rating or '4.5' }}">
                         <i class="bi bi-info-circle me-2"></i>View Details
                     </button>
                 </div>
@@ -154,6 +179,12 @@
                         <div class="display-1 mb-3">🛒</div>
                         <h2 class="modal-title fw-bold" id="productModalLabel">Product Name</h2>
                         <p class="text-muted mb-0" id="modal-category">Category Name</p>
+                        <div class="mt-2 d-flex justify-content-center align-items-center gap-2">
+                            <div class="star-rating">
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <span class="fw-bold" id="modal-rating-display">4.5</span>
+                        </div>
                     </div>
                     
                     <div class="info-grid bg-light rounded-4 p-3 mb-4 d-flex justify-content-around text-center">
@@ -168,6 +199,19 @@
                         </div>
                     </div>
                     
+                    <!-- Interactive Rating Section -->
+                    <div class="rating-section text-center mb-4 p-3 rounded-4" style="background: var(--badge-bg);">
+                        <p class="fw-bold mb-2">Rate this product</p>
+                        <div class="star-rating star-rating-interactive" id="interactive-stars">
+                            <i class="bi bi-star" data-value="1"></i>
+                            <i class="bi bi-star" data-value="2"></i>
+                            <i class="bi bi-star" data-value="3"></i>
+                            <i class="bi bi-star" data-value="4"></i>
+                            <i class="bi bi-star" data-value="5"></i>
+                        </div>
+                        <p class="small text-muted mt-2" id="rating-status">Click a star to rate</p>
+                    </div>
+
                     <div class="product-features">
                         <div class="d-flex align-items-center gap-3 mb-3">
                             <div class="feature-icon bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -201,16 +245,20 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const productModal = document.getElementById('productModal');
+        let currentProductId = null;
+
         if (productModal) {
             productModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
                 
                 // Extract info from data attributes
+                currentProductId = button.getAttribute('data-id');
                 const name = button.getAttribute('data-name');
                 const price = button.getAttribute('data-price');
                 const variant = button.getAttribute('data-variant');
                 const partition = button.getAttribute('data-partition');
                 const category = button.getAttribute('data-category');
+                const rating = button.getAttribute('data-rating');
                 
                 // Update modal content
                 const modalTitle = productModal.querySelector('.modal-title');
@@ -218,13 +266,96 @@
                 const modalVariant = productModal.querySelector('#modal-variant');
                 const modalPartition = productModal.querySelector('#modal-partition');
                 const modalCategory = productModal.querySelector('#modal-category');
+                const modalRatingDisplay = productModal.querySelector('#modal-rating-display');
                 
                 modalTitle.textContent = name;
                 modalPrice.textContent = price;
                 modalVariant.textContent = variant;
                 modalPartition.textContent = partition;
                 modalCategory.textContent = category;
+                modalRatingDisplay.textContent = rating;
+
+                // Reset interactive stars
+                resetStars();
+                document.getElementById('rating-status').textContent = "Click a star to rate";
             });
+        }
+
+        // Interactive Stars Logic
+        const starsContainer = document.getElementById('interactive-stars');
+        const stars = starsContainer.querySelectorAll('i');
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                highlightStars(value);
+            });
+
+            star.addEventListener('mouseout', function() {
+                resetStars();
+            });
+
+            star.addEventListener('click', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                submitRating(currentProductId, value);
+            });
+        });
+
+        function highlightStars(value) {
+            stars.forEach(s => {
+                const sVal = parseInt(s.getAttribute('data-value'));
+                if (sVal <= value) {
+                    s.classList.replace('bi-star', 'bi-star-fill');
+                    s.classList.add('text-warning');
+                } else {
+                    s.classList.replace('bi-star-fill', 'bi-star');
+                    s.classList.remove('text-warning');
+                }
+            });
+        }
+
+        function resetStars() {
+            stars.forEach(s => {
+                s.classList.replace('bi-star-fill', 'bi-star');
+                s.classList.remove('text-warning');
+            });
+        }
+
+        async function submitRating(productId, value) {
+            const statusLabel = document.getElementById('rating-status');
+            statusLabel.textContent = "Submitting...";
+            
+            const formData = new FormData();
+            formData.append('rating', value);
+
+            try {
+                const response = await fetch(`/rate/${productId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusLabel.textContent = "Thank you for rating!";
+                    document.getElementById('modal-rating-display').textContent = data.new_rating;
+                    
+                    // Update the card rating too
+                    const card = document.getElementById(`product-card-${productId}`);
+                    if (card) {
+                        card.querySelector('.rating-value').textContent = data.new_rating;
+                        // Also update the button's data attribute
+                        card.querySelector('.view-details-btn').setAttribute('data-rating', data.new_rating);
+                    }
+                    
+                    highlightStars(value);
+                    // Disable further clicks for this session? Or just leave it.
+                } else {
+                    statusLabel.textContent = "Error: " + (data.error || "Failed to submit");
+                }
+            } catch (error) {
+                statusLabel.textContent = "Network error. Try again.";
+                console.error(error);
+            }
         }
     });
 </script>
