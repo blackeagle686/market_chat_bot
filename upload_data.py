@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import pandas as pd
+from rapidfuzz import process, fuzz
 from database import SessionLocal, Category, Product, init_db
 
 
@@ -166,12 +167,41 @@ def upload_data(excel_file, sheet_name=None):
         image_target_dir = os.path.join("static", "uploads")
         os.makedirs(image_target_dir, exist_ok=True)
 
-        for index, row in df.iterrows():
-            # Image logic: 1.jpeg for first row (index 0), 2.jpeg for second, etc.
-            image_filename = f"{index + 1}.jpeg"
-            source_path = os.path.join(image_source_dir, image_filename)
-            product_image_url = None
+        # Load OCR results if available
+        ocr_mapping = {}
+        if os.path.exists('ocr_results.csv'):
+            print("Loading OCR results for image matching...")
+            ocr_df = pd.read_csv('ocr_results.csv')
+            # Create a list of OCR names for fuzzy matching
+            ocr_names = ocr_df['product_name'].astype(str).tolist()
+            ocr_filenames = ocr_df['filename'].tolist()
+            # Zip them into a dictionary for lookup
+            for name, fname in zip(ocr_names, ocr_filenames):
+                if name.lower() != 'unknown':
+                    ocr_mapping[name] = fname
 
+        for index, row in df.iterrows():
+            product_name = str(get_value(row, mapped_columns, "name", "")).strip()
+            product_image_url = None
+            image_filename = None
+
+            # Try OCR matching first
+            if ocr_mapping and product_name:
+                best_match = process.extractOne(
+                    product_name, 
+                    list(ocr_mapping.keys()), 
+                    scorer=fuzz.token_set_ratio
+                )
+                if best_match and best_match[1] >= 80:  # Threshold for good match
+                    image_filename = ocr_mapping[best_match[0]]
+                    print(f"  OCR Match: '{product_name}' -> '{best_match[0]}' using {image_filename}")
+
+            # Fallback to index-based matching if OCR fails or no match found
+            if not image_filename:
+                image_filename = f"{index + 1}.jpeg"
+                # print(f"  Fallback: Using index {image_filename} for '{product_name}'")
+
+            source_path = os.path.join(image_source_dir, image_filename)
             if os.path.exists(source_path):
                 # Copy image to static/uploads if it exists
                 target_filename = f"product_{index + 1}_{image_filename}"
@@ -179,9 +209,8 @@ def upload_data(excel_file, sheet_name=None):
                 shutil.copy2(source_path, target_path)
                 product_image_url = f"/static/uploads/{target_filename}"
             else:
-                # Try common image names like beti.jpeg if numeric index fails
-                # (Though user said it follows the index, it's good as a fallback)
-                alt_name = str(get_value(row, mapped_columns, "name", "")).lower().replace(" ", "_") + ".jpeg"
+                # Last resort fallback to normalized name
+                alt_name = product_name.lower().replace(" ", "_") + ".jpeg"
                 alt_source = os.path.join(image_source_dir, alt_name)
                 if os.path.exists(alt_source):
                     target_filename = f"product_{index + 1}_{alt_name}"
