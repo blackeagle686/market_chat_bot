@@ -3,11 +3,7 @@ import cv2
 import pandas as pd
 import numpy as np
 
-# EasyOCR is much better for product packaging and supports Arabic/English well
-try:
-    import easyocr
-except ImportError:
-    print("EasyOCR not found. Please install it using: !pip install easyocr")
+import easyocr
 
 # Path to the images directory
 IMAGE_DIR = 'market_image/New folder'
