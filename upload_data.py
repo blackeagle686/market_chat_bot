@@ -1,5 +1,5 @@
-import argparse
 import os
+import shutil
 import pandas as pd
 from database import SessionLocal, Category, Product, init_db
 
@@ -80,7 +80,7 @@ def create_category(db, name, description=None, image_url=None):
     return category
 
 
-def create_product(db, mapped_columns, row, category_id):
+def create_product(db, mapped_columns, row, category_id, image_url=None):
     product_name = str(get_value(row, mapped_columns, "name", "")).strip()
     if not product_name:
         return None
@@ -103,6 +103,8 @@ def create_product(db, mapped_columns, row, category_id):
     if existing:
         existing.price = price
         existing.partition = partition
+        if image_url:
+            existing.image_url = image_url
         db.add(existing)
         return existing
 
@@ -111,7 +113,8 @@ def create_product(db, mapped_columns, row, category_id):
         price=price,
         variant=variant,
         partition=partition,
-        category_id=category_id
+        category_id=category_id,
+        image_url=image_url
     )
     db.add(product)
     return product
@@ -157,7 +160,34 @@ def upload_data(excel_file, sheet_name=None):
         created_products = 0
         updated_products = 0
 
+        # Directory for product images
+        image_source_dir = os.path.join("market_image", "New folder")
+        image_target_dir = os.path.join("static", "uploads")
+        os.makedirs(image_target_dir, exist_ok=True)
+
         for index, row in df.iterrows():
+            # Image logic: 1.jpeg for first row (index 0), 2.jpeg for second, etc.
+            image_filename = f"{index + 1}.jpeg"
+            source_path = os.path.join(image_source_dir, image_filename)
+            product_image_url = None
+
+            if os.path.exists(source_path):
+                # Copy image to static/uploads if it exists
+                target_filename = f"product_{index + 1}_{image_filename}"
+                target_path = os.path.join(image_target_dir, target_filename)
+                shutil.copy2(source_path, target_path)
+                product_image_url = f"/static/uploads/{target_filename}"
+            else:
+                # Try common image names like beti.jpeg if numeric index fails
+                # (Though user said it follows the index, it's good as a fallback)
+                alt_name = str(get_value(row, mapped_columns, "name", "")).lower().replace(" ", "_") + ".jpeg"
+                alt_source = os.path.join(image_source_dir, alt_name)
+                if os.path.exists(alt_source):
+                    target_filename = f"product_{index + 1}_{alt_name}"
+                    target_path = os.path.join(image_target_dir, target_filename)
+                    shutil.copy2(alt_source, target_path)
+                    product_image_url = f"/static/uploads/{target_filename}"
+
             category_name = str(get_value(row, mapped_columns, "category", "")).strip()
             if not category_name:
                 # If no category specified, try to infer from partition or set default
@@ -190,7 +220,7 @@ def upload_data(excel_file, sheet_name=None):
                 Product.category_id == category.id
             ).count()
 
-            product = create_product(db, mapped_columns, row, category.id)
+            product = create_product(db, mapped_columns, row, category.id, image_url=product_image_url)
             if product is None:
                 continue
 
