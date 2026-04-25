@@ -267,7 +267,7 @@
                                value="{{ product.price }}" placeholder="0.00" required>
                     </div>
                     <div class="form-field">
-                        <label class="field-label">Category</label>
+                        <label class="field-label">Partition</label>
                         <select name="category_id" class="field-select">
                             {% for cat in categories %}
                             <option value="{{ cat.id }}" {{ 'selected' if cat.id == product.category_id else '' }}>
@@ -336,7 +336,7 @@
                 <strong>{{ product.partition or 'None' }}</strong>
             </div>
             <div class="preview-meta-row">
-                <span>Category</span>
+                <span>Partition Group</span>
                 <strong>{{ product.category.name if product.category else 'General' }}</strong>
             </div>
             <div class="preview-meta-row">
