@@ -1099,11 +1099,13 @@ body.light-mode .va-footer {
 }
 
 .chat-header-inner {
-    padding: 8px 15px;
+    padding: 4px 10px;
     border-bottom: 1px solid var(--chip-border);
     display: flex;
     justify-content: flex-end;
-    flex-shrink: 0;   /* never squish the header */
+    align-items: center;
+    flex-shrink: 0;
+    min-height: 0;
 }
 
 .close-chat {
@@ -1111,10 +1113,11 @@ body.light-mode .va-footer {
     color: var(--green-primary);
     border: 1px solid var(--green-primary);
     border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
+    padding: 3px 10px;
+    font-size: 0.72rem;
     font-weight: 600;
     cursor: pointer;
+    line-height: 1.4;
 }
 
 .close-chat:hover {
