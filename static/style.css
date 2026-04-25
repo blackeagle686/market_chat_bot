@@ -297,35 +297,47 @@ body {
 body {
     display: flex;
     flex-direction: row-reverse;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .main-content {
     flex: 1;
     min-width: 0;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;          /* children manage their own scroll */
+    overflow-y: auto;          /* catalog pages scroll freely */
     display: flex;
     flex-direction: column;
+}
+
+/* ── Chat page only: lock to viewport, no page scroll ── */
+body.chat-page {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+body.chat-page .main-content {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;          /* only .chat-window scrolls inside */
 }
 
 /* Phone (<992px): header on top, content below */
 @media (max-width: 991px) {
     body {
         flex-direction: column;
-        height: auto;
-        min-height: 100vh;
-        min-height: 100dvh;
-        overflow: auto;
+    }
+    body.chat-page {
+        height: 100dvh;
+        overflow: hidden;
     }
     .main-content {
         flex: 1;
-        height: auto;
-        min-height: 0;
-        overflow: visible;
+        overflow-y: auto;
+    }
+    body.chat-page .main-content {
+        height: 100%;
+        overflow: hidden;
     }
 }
 
