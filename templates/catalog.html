@@ -16,7 +16,7 @@
     <div class="container mt-4">
         <div class="page-header">
             <h1>Explore Our Market</h1>
-            <p>Find what you need — browse by category or search directly</p>
+            <p>Find what you need — browse by partition or search directly</p>
         </div>
 
         <div class="search-container">
@@ -28,7 +28,7 @@
             </form>
         </div>
 
-        <div class="section-title">Categories</div>
+        <div class="section-title">Partitions</div>
 
         <div class="grid">
             {% for category in categories if category.name.lower() != 'general' and category.products | length > 0 %}
@@ -46,7 +46,7 @@
             {% else %}
             <div class="empty-state">
                 <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.4"></i>
-                <p>No categories found. Please run the data migration first.</p>
+                <p>No partitions found. Please run the data migration first.</p>
             </div>
             {% endfor %}
         </div>
