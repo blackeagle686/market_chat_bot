@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const chip = document.createElement('button');
             chip.className = 'suggestion-chip';
             chip.innerHTML = `<i class="bi bi-stars"></i> ${text}`;
-            chip.onclick = () => sendMessage(text);
             suggestionsDiv.appendChild(chip);
         });
         
