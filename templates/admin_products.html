@@ -1,68 +1,384 @@
 {% extends "base.html" %}
+{% set use_market_css = True %}
 
 {% block title %}Manage Products — MarketAI Admin{% endblock %}
 
+{% block head %}
+{{ super() }}
+<style>
+    .admin-page { padding: 1.5rem 1.5rem 3rem; max-width: 1300px; margin: 0 auto; }
+
+    /* Top Bar */
+    .admin-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+    .admin-page-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: clamp(1.3rem, 3vw, 1.8rem);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text);
+        margin: 0;
+    }
+    .admin-page-subtitle { font-size: 0.85rem; color: var(--text-muted); margin: 2px 0 0; }
+    .logout-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 20px;
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.25);
+        border-radius: 50px;
+        color: #f87171;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .logout-btn:hover {
+        background: rgba(239,68,68,0.2);
+        color: #ef4444;
+        transform: translateY(-1px);
+    }
+    body.light-mode .logout-btn { color: #dc2626; }
+
+    /* Stats Row */
+    .stats-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .stat-card {
+        flex: 1;
+        min-width: 120px;
+        background: var(--surface-solid);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .stat-icon {
+        width: 38px; height: 38px;
+        background: linear-gradient(135deg, rgba(96,165,250,0.15), rgba(59,130,246,0.2));
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; color: #60a5fa;
+        flex-shrink: 0;
+    }
+    .stat-value { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* Search Panel */
+    .search-panel {
+        background: var(--surface-solid);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 12px 16px;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .search-panel-input-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--search-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px 14px;
+    }
+    .search-panel-input-wrap i { color: var(--text-muted); font-size: 0.95rem; }
+    .search-panel-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-size: 0.92rem;
+        font-family: 'Inter', sans-serif;
+    }
+    .search-panel-input::placeholder { color: var(--text-muted); opacity: 0.7; }
+    .search-btn {
+        padding: 8px 22px;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .search-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(59,130,246,0.35); }
+    .clear-btn {
+        padding: 8px 16px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .clear-btn:hover { background: var(--search-bg); color: var(--text); }
+
+    /* Table */
+    .admin-table-wrap {
+        background: var(--surface-solid);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .admin-table { width: 100%; border-collapse: collapse; color: var(--text); }
+    .admin-table thead tr {
+        background: rgba(255,255,255,0.02);
+        border-bottom: 1px solid var(--border);
+    }
+    .admin-table th {
+        padding: 10px 16px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+    .admin-table td {
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        vertical-align: middle;
+    }
+    body.light-mode .admin-table td { border-bottom-color: rgba(0,0,0,0.05); }
+    .admin-table tbody tr { transition: background 0.15s ease; }
+    .admin-table tbody tr:hover { background: var(--card-hover-bg); }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+
+    .product-thumb {
+        width: 38px; height: 38px;
+        border-radius: 8px;
+        background: var(--search-bg);
+        border: 1px solid var(--border);
+        overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        font-size: 1rem; color: var(--text-muted);
+    }
+    .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .product-name { font-weight: 600; font-size: 0.9rem; }
+    .product-id-badge {
+        font-size: 0.7rem;
+        background: var(--search-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 1px 7px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+    .cat-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        background: rgba(96,165,250,0.12);
+        border: 1px solid rgba(96,165,250,0.22);
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #60a5fa;
+        white-space: nowrap;
+    }
+    body.light-mode .cat-badge { background: rgba(59,130,246,0.08); color: #2563eb; }
+
+    .edit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 14px;
+        background: rgba(96,165,250,0.1);
+        border: 1px solid rgba(96,165,250,0.25);
+        border-radius: 8px;
+        color: #60a5fa;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .edit-btn:hover {
+        background: #3b82f6;
+        color: white;
+        border-color: transparent;
+        transform: translateY(-1px);
+    }
+    body.light-mode .edit-btn { color: #2563eb; }
+
+    /* Pagination */
+    .admin-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 16px;
+        border-top: 1px solid var(--border);
+    }
+    .page-nav-btn {
+        width: 34px; height: 34px;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--search-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .page-nav-btn:hover { background: #3b82f6; border-color: transparent; color: white; }
+    .page-info { font-size: 0.82rem; color: var(--text-muted); padding: 0 8px; }
+
+    /* No results */
+    .empty-row td {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+    }
+    .empty-row i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+    @media (max-width: 640px) {
+        .admin-page { padding: 1rem 0.85rem 2rem; }
+        .stats-row { display: none; }
+        .search-panel { flex-wrap: wrap; }
+        .admin-table th:nth-child(3),
+        .admin-table td:nth-child(3),
+        .admin-table th:nth-child(5),
+        .admin-table td:nth-child(5) { display: none; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="admin-page">
+
+    <!-- Top Bar -->
+    <div class="admin-topbar">
         <div>
-            <h1 class="h2 fw-bold mb-0">Product Management</h1>
-            <p class="text-muted">Edit product details and manage inventory images</p>
+            <h1 class="admin-page-title">Product Management</h1>
+            <p class="admin-page-subtitle">Edit product details and manage inventory images</p>
         </div>
-        <a href="/admin/logout" class="btn btn-outline-danger rounded-pill px-4">
-            <i class="bi bi-box-arrow-right me-2"></i>Logout
+        <a href="/admin/logout" class="logout-btn">
+            <i class="bi bi-box-arrow-right"></i> Logout
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: var(--surface-solid);">
-        <div class="p-3 border-bottom border-light" style="background: rgba(255,255,255,0.02);">
-            <form action="/admin/products" method="get" class="d-flex gap-2">
-                <div class="input-group">
-                    <span class="input-group-text border-0 bg-transparent text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" class="form-control border-0 bg-transparent" 
-                           placeholder="Search products by name..." value="{{ query or '' }}"
-                           style="color: var(--text);">
-                </div>
-                <button type="submit" class="btn btn-primary rounded-pill px-4">Search</button>
-            </form>
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+            <div>
+                <div class="stat-value">{{ products | length }}</div>
+                <div class="stat-label">On this page</div>
+            </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-layers"></i></div>
+            <div>
+                <div class="stat-value">{{ total_pages }}</div>
+                <div class="stat-label">Total pages</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <div class="stat-value">{{ page }}</div>
+                <div class="stat-label">Current page</div>
+            </div>
+        </div>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" style="color: var(--text);">
-                <thead class="small text-muted text-uppercase" style="background: rgba(255,255,255,0.01);">
+    <!-- Search -->
+    <form action="/admin/products" method="get">
+        <div class="search-panel">
+            <div class="search-panel-input-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" class="search-panel-input"
+                       placeholder="Search by product name, variant, or category..."
+                       value="{{ query or '' }}" id="admin-search-input">
+            </div>
+            <button type="submit" class="search-btn">
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+            {% if query %}
+            <a href="/admin/products" class="clear-btn">
+                <i class="bi bi-x"></i> Clear
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Table -->
+    <div class="admin-table-wrap">
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <th class="px-4">ID</th>
+                        <th>ID</th>
                         <th>Product</th>
                         <th>Variant</th>
                         <th>Price</th>
                         <th>Category</th>
-                        <th class="text-end px-4">Actions</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for product in products %}
                     <tr>
-                        <td class="px-4 text-muted small">#{{ product.id }}</td>
+                        <td><span class="product-id-badge">#{{ product.id }}</span></td>
                         <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-3 d-flex align-items-center justify-content-center overflow-hidden" 
-                                     style="width: 40px; height: 40px; background: var(--search-bg);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="product-thumb">
                                     {% if product.image_url %}
-                                    <img src="{{ product.image_url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="{{ product.image_url }}" alt="">
                                     {% else %}
-                                    <i class="bi bi-image text-muted"></i>
+                                    <i class="bi bi-image"></i>
                                     {% endif %}
                                 </div>
-                                <span class="fw-semibold">{{ product.name }}</span>
+                                <span class="product-name">{{ product.name }}</span>
                             </div>
                         </td>
-                        <td class="text-muted small">{{ product.variant or '-' }}</td>
-                        <td><span class="fw-bold">{{ "%.2f" | format(product.price) }}</span> <small>EGP</small></td>
-                        <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ product.category.name if product.category else 'General' }}</span></td>
-                        <td class="text-end px-4">
-                            <a href="/admin/product/edit/{{ product.id }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                <i class="bi bi-pencil-square me-1"></i> Edit
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">
+                            {{ product.variant or '—' }}
+                        </td>
+                        <td>
+                            <span style="font-weight: 700; color: #60a5fa;">{{ "%.2f" | format(product.price) }}</span>
+                            <small style="color: var(--text-muted); font-size: 0.72rem;"> EGP</small>
+                        </td>
+                        <td>
+                            <span class="cat-badge">{{ product.category.name if product.category else 'General' }}</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="/admin/product/edit/{{ product.id }}" class="edit-btn">
+                                <i class="bi bi-pencil-square"></i> Edit
                             </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr class="empty-row">
+                        <td colspan="6">
+                            <i class="bi bi-search-heart"></i>
+                            No products found{% if query %} for "<strong>{{ query }}</strong>"{% endif %}.
                         </td>
                     </tr>
                     {% endfor %}
@@ -71,24 +387,18 @@
         </div>
 
         {% if total_pages > 1 %}
-        <div class="p-4 border-top border-light d-flex justify-content-center">
-            <nav aria-label="Pagination">
-                <div class="pagination gap-2">
-                    {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="btn btn-light btn-sm rounded-circle shadow-sm">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
-                    {% endif %}
-                    
-                    <span class="px-3 align-self-center text-muted small">Page {{ page }} of {{ total_pages }}</span>
-                    
-                    {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="btn btn-light btn-sm rounded-circle shadow-sm">
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    {% endif %}
-                </div>
-            </nav>
+        <div class="admin-pagination">
+            {% if page > 1 %}
+            <a href="?page={{ page - 1 }}&q={{ query or '' }}" class="page-nav-btn">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+            <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}&q={{ query or '' }}" class="page-nav-btn">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>
