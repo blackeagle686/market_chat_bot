@@ -1230,9 +1230,11 @@ body.light-mode .va-footer {
 }
 
 .hidden-chat-form {
-    padding: 20px;
+    padding: 10px 15px;
     border-top: 1px solid var(--chip-border);
     background: var(--form-bg);
+    backdrop-filter: blur(10px);
+    z-index: 10;
 }
 
 .input-group {
@@ -1264,9 +1266,11 @@ body.light-mode .input-group .form-control::placeholder {
 .input-group {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 40px;
-    padding: 5px;
+    padding: 3px 6px;
     border: 1px solid var(--chip-border);
     gap: 8px;
+    display: flex;
+    align-items: center;
 }
 
 .input-group .form-control {
@@ -1286,9 +1290,11 @@ body.light-mode .input-group .form-control::placeholder {
     background: var(--green-button);
     border: none;
     color: white;
-    padding: 0 20px;
+    padding: 0 16px;
+    height: 38px;
     border-radius: 30px;
     font-weight: 600;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
 }
 
@@ -1301,8 +1307,8 @@ body.light-mode .input-group .form-control::placeholder {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: var(--text-main);
-    width: 45px;
-    height: 45px;
+    width: 38px;
+    height: 38px;
     border-radius: 50% !important;
     display: flex;
     align-items: center;
