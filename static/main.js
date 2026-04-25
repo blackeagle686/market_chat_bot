@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMicBtn    = document.getElementById('chat-mic-btn');
     
     // Suggestions
-    const suggestionChips = document.querySelectorAll('.suggestion-chip');
+    // Suggestions handled by delegated listener at bottom
     
     // Theme Toggle is now handled globally in base.html
     let currentReplyContext = null;
@@ -67,12 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    suggestionChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            const text = chip.textContent.trim();
-            if (text) sendMessage(text);
-        });
-    });
 
     function appendMessage(text, side, isLoading = false) {
         showChatView();
@@ -432,10 +426,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Wire suggestion chips inside chat replies (delegated)
+    // Wire all suggestion chips (initial and dynamic)
     document.addEventListener('click', (e) => {
         const chip = e.target.closest('.suggestion-chip');
-        if (chip && chip.onclick == null) {
+        if (chip) {
             const text = chip.textContent.trim();
             if (text) sendMessage(text);
         }
