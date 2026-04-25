@@ -1,40 +1,186 @@
 {% extends "base.html" %}
+{% set use_market_css = True %}
 
 {% block title %}Admin Login — MarketAI{% endblock %}
 
+{% block head %}
+{{ super() }}
+<style>
+    .admin-login-wrapper {
+        min-height: calc(100vh - 70px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface-solid);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Top accent bar */
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #60a5fa, #3b82f6, #1d4ed8);
+    }
+
+    .login-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, rgba(96,165,250,0.15), rgba(59,130,246,0.25));
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.2rem;
+        font-size: 1.8rem;
+    }
+
+    .login-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 0.3rem;
+        letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+    }
+
+    .admin-form-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    .admin-input {
+        width: 100%;
+        padding: 0.75rem 1.1rem;
+        background: var(--search-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .admin-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        background: var(--surface-solid);
+    }
+
+    .admin-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+    .admin-submit-btn {
+        width: 100%;
+        padding: 0.8rem;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+        margin-top: 0.5rem;
+    }
+    .admin-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(59,130,246,0.45);
+    }
+    .admin-submit-btn:active { transform: translateY(0); }
+
+    .admin-error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.25);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 0.88rem;
+        color: #fca5a5;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    body.light-mode .admin-error {
+        background: rgba(239,68,68,0.06);
+        color: #dc2626;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-muted);
+        font-size: 0.83rem;
+        text-decoration: none;
+        transition: color 0.2s;
+        margin-top: 1.5rem;
+    }
+    .back-link:hover { color: var(--primary); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="card border-0 shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 24px; background: var(--surface-solid);">
-        <div class="text-center mb-4">
-            <div class="display-4 mb-2">🔐</div>
-            <h2 class="fw-bold h3">Admin Portal</h2>
-            <p class="text-muted">Enter your credentials to manage products</p>
+<div class="admin-login-wrapper">
+    <div class="login-card">
+        <div class="text-center">
+            <div class="login-icon">🔐</div>
+            <h1 class="login-title">Admin Portal</h1>
+            <p class="login-subtitle">Enter your credentials to manage products</p>
         </div>
 
         {% if error %}
-        <div class="alert alert-danger border-0 rounded-4 mb-4">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
+        <div class="admin-error">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ error }}
         </div>
         {% endif %}
 
         <form action="/admin/login" method="post">
             <div class="mb-3">
-                <label for="username" class="form-label small fw-bold text-muted text-uppercase">Username</label>
-                <input type="text" class="form-control rounded-pill px-4 py-2 border-0 shadow-sm" id="username" name="username" required 
-                       style="background: var(--search-bg); color: var(--text);">
+                <label for="username" class="admin-form-label">Username</label>
+                <input type="text" class="admin-input" id="username" name="username"
+                       placeholder="Enter username" required autocomplete="username">
             </div>
             <div class="mb-4">
-                <label for="password" class="form-label small fw-bold text-muted text-uppercase">Password</label>
-                <input type="password" class="form-control rounded-pill px-4 py-2 border-0 shadow-sm" id="password" name="password" required
-                       style="background: var(--search-bg); color: var(--text);">
+                <label for="password" class="admin-form-label">Password</label>
+                <input type="password" class="admin-input" id="password" name="password"
+                       placeholder="Enter password" required autocomplete="current-password">
             </div>
-            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-lg">
-                Login to Dashboard
+            <button type="submit" class="admin-submit-btn">
+                <i class="bi bi-shield-lock me-2"></i>Login to Dashboard
             </button>
         </form>
-        
-        <div class="mt-4 text-center">
-            <a href="/" class="text-muted text-decoration-none small">
+
+        <div class="text-center">
+            <a href="/" class="back-link">
                 <i class="bi bi-arrow-left"></i> Back to Shop
             </a>
         </div>
