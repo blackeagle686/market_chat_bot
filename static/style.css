@@ -1235,7 +1235,9 @@ body.light-mode .va-footer {
     border-top: 1px solid var(--chip-border);
     background: var(--form-bg);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     z-index: 10;
+    flex-shrink: 0;   /* ← CRITICAL: prevents form from being squished */
 }
 
 .input-group {
