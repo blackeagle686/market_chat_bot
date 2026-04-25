@@ -288,9 +288,13 @@ async def admin_products(request: Request, q: str = None, page: int = 1, db: Ses
     limit = 20
     offset = (page - 1) * limit
     
-    query = db.query(Product)
+    query = db.query(Product).join(Category, isouter=True)
     if q:
-        query = query.filter(Product.name.contains(q))
+        query = query.filter(
+            (Product.name.contains(q)) | 
+            (Product.variant.contains(q)) | 
+            (Category.name.contains(q))
+        )
     
     total_products = query.count()
     products = query.offset(offset).limit(limit).all()
