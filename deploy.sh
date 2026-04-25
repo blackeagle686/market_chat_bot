@@ -3,43 +3,74 @@
 # Exit on any error
 set -e
 
-echo "--- Starting Deployment on mohamed-01095513686 (95.216.63.78) ---"
+echo "--- Starting Native Deployment on mohamed-01095513686 (95.216.63.78) ---"
 
-# 1. Update system and install dependencies
-echo "[1/4] Installing system dependencies (Docker, Git)..."
+# 1. Install System Dependencies
+echo "[1/5] Installing system dependencies (Python, Redis, FFmpeg, Git)..."
 sudo apt-get update -y
-sudo apt-get install -y docker.io docker-compose git
+sudo apt-get install -y python3-pip python3-venv redis-server ffmpeg git libmagic1
 
-# 2. Clone or Update the repository
+# 2. Start Redis
+echo "[2/5] Ensuring Redis is running..."
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# 3. Setup Project
 REPO_DIR="market_chat_bot"
 REPO_URL="https://github.com/blackeagle686/market_chat_bot.git"
 
 if [ -d "$REPO_DIR" ]; then
-    echo "[2/4] Updating existing repository..."
-    cd "$REPO_DIR"
-    git pull origin master
+    echo "[3/5] Updating repository..."
+    if [ "$(basename "$PWD")" != "$REPO_DIR" ]; then
+        cd "$REPO_DIR"
+    fi
+    git fetch origin master
+    git reset --hard origin/master
 else
-    echo "[2/4] Cloning repository..."
+    echo "[3/5] Cloning repository..."
     git clone "$REPO_URL"
     cd "$REPO_DIR"
 fi
 
-# 3. Build and Start the containers
-echo "[3/4] Building and starting containers with Docker Compose..."
-# Ensure any old containers are stopped
-sudo docker-compose down || true
-# Build and start in detached mode
-sudo docker-compose up --build -d
+# 4. Setup Virtual Environment and Requirements
+echo "[4/5] Setting up Python virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 
-# 4. Final check
-echo "[4/4] Verifying deployment..."
-sleep 5
-if sudo docker ps | grep -q "market_chat_bot_app"; then
-    echo "===================================================="
-    echo "SUCCESS: Market Chat Bot is running!"
-    echo "Access it at: http://95.216.63.78:8000"
-    echo "===================================================="
-else
-    echo "ERROR: Deployment failed. Check logs with 'sudo docker-compose logs'"
-    exit 1
-fi
+# 5. Setup Systemd Service
+echo "[5/5] Configuring systemd service..."
+PROJECT_PATH=$(pwd)
+SERVICE_FILE="/etc/systemd/system/market_bot.service"
+
+sudo bash -c "cat <<EOF > $SERVICE_FILE
+[Unit]
+Description=Market Chat Bot FastAPI App
+After=network.target redis-server.service
+
+[Service]
+User=$USER
+Group=www-data
+WorkingDirectory=$PROJECT_PATH
+Environment=\"PATH=$PROJECT_PATH/venv/bin\"
+Environment=\"OPENAI_API_KEY=ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G\"
+Environment=\"OPENAI_BASE_URL=https://api.longcat.chat/openai\"
+Environment=\"REDIS_URL=redis://localhost:6379\"
+ExecStart=$PROJECT_PATH/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF"
+
+sudo systemctl daemon-reload
+sudo systemctl enable market_bot
+sudo systemctl restart market_bot
+
+echo "===================================================="
+echo "SUCCESS: Market Chat Bot is running natively!"
+echo "Service Name: market_bot"
+echo "Access it at: http://95.216.63.78:8000"
+echo "Check logs with: sudo journalctl -u market_bot -f"
+echo "===================================================="
