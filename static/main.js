@@ -59,16 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeChatBtn.addEventListener('click', hideChatView);
 
-    // Clicking exit just resets view for now
-    exitBtn.addEventListener('click', () => {
-        hideChatView();
-        stopRecordingAll();
-    });
+    // Exit button removed from HTML — guard against null
+    if (exitBtn) {
+        exitBtn.addEventListener('click', () => {
+            hideChatView();
+            stopRecordingAll();
+        });
+    }
 
     suggestionChips.forEach(chip => {
         chip.addEventListener('click', () => {
             const text = chip.textContent.trim();
-            sendMessage(text);
+            if (text) sendMessage(text);
         });
     });
 
@@ -171,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         replyIndicator.classList.add('d-none');
     }
 
-    cancelReply.addEventListener('click', clearReplyContext);
+    if (cancelReply) cancelReply.addEventListener('click', clearReplyContext);
 
     // ── Send a message text ──────────────────────────────────────────────────
     async function sendMessage(text) {
@@ -241,10 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Form submit (keyboard / send button) ─────────────────────────────────
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        sendMessage(userInput.value);
-    });
+    if (chatForm) {
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            sendMessage(userInput.value);
+        });
+    }
 
     // ── Voice UI helpers ─────────────────────────────────────────────────────
     function setRecordingUI(state) {
@@ -420,13 +424,22 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleRecording();
         });
     }
-    
+
     if (chatMicBtn) {
         chatMicBtn.addEventListener('click', () => {
             console.log("[Mic] Chat Mic Clicked. isRecording:", isRecording);
             toggleRecording();
         });
     }
+
+    // Wire suggestion chips inside chat replies (delegated)
+    document.addEventListener('click', (e) => {
+        const chip = e.target.closest('.suggestion-chip');
+        if (chip && chip.onclick == null) {
+            const text = chip.textContent.trim();
+            if (text) sendMessage(text);
+        }
+    });
 
     function toggleRecording() {
         if (!isRecording) {
