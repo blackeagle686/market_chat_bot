@@ -1058,11 +1058,12 @@ body.light-mode .va-footer {
     max-width: none;
     background: var(--chat-bg);
     backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--chat-border);
     border-radius: 20px;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    z-index: 100;
+    z-index: 1000;
     overflow: hidden;
     box-shadow: 0 20px 50px var(--chat-shadow);
     transition: opacity 0.3s ease, transform 0.3s ease;
