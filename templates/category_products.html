@@ -136,7 +136,7 @@
                 </div>
 
                 <div class="product-footer-action mt-3">
-                    <button class="btn btn-primary view-details-btn" 
+<button class="btn btn-primary view-details-btn" 
                             data-bs-toggle="modal" 
                             data-bs-target="#productModal"
                             data-id="{{ product.id }}"
@@ -146,7 +146,8 @@
                             data-partition="{{ product.partition or 'General' }}"
                             data-category="{{ category.name }}"
                             data-rating="{{ product.rating or '4.5' }}"
-                            data-image="{{ product.image_url or '' }}">
+                            data-image="{{ product.image_url or '' }}"
+                            data-description="{{ product.description or '' }}">
                         <i class="bi bi-info-circle me-2"></i>View Details
                     </button>
                 </div>
@@ -241,6 +242,15 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Product Description -->
+                    <div id="modal-description-section" style="margin-top: 12px; display: none;">
+                        <div style="height: 1px; background: var(--border, rgba(255,255,255,0.1)); margin: 10px 0;"></div>
+                        <p style="font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">
+                            <i class="bi bi-card-text me-1"></i> Description
+                        </p>
+                        <p id="modal-description" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin: 0;"></p>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 p-4">
                     <button type="button" class="btn btn-secondary w-100 rounded-pill py-2 fw-bold" data-bs-dismiss="modal">Close Preview</button>
@@ -279,6 +289,8 @@
                 const modalRatingDisplay = productModal.querySelector('#modal-rating-display');
                 const modalImg = productModal.querySelector('#modal-image');
                 const modalImgPlaceholder = productModal.querySelector('#modal-image-placeholder');
+                const modalDescription = productModal.querySelector('#modal-description');
+                const modalDescSection = productModal.querySelector('#modal-description-section');
                 
                 modalTitle.textContent = name;
                 modalPrice.textContent = price;
@@ -286,6 +298,15 @@
                 modalPartition.textContent = partition;
                 modalCategory.textContent = category;
                 modalRatingDisplay.textContent = rating;
+
+                // Show description if available
+                const description = button.getAttribute('data-description');
+                if (description && description.trim()) {
+                    modalDescription.textContent = description.trim();
+                    modalDescSection.style.display = 'block';
+                } else {
+                    modalDescSection.style.display = 'none';
+                }
                 
                 if (image) {
                     modalImg.src = image;
