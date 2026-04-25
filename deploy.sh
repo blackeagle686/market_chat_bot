@@ -39,6 +39,11 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# --- NEW STEP: Upload Data ---
+echo "[*] Uploading product data from Excel..."
+python3 upload_data.py
+# -----------------------------
+
 # 5. Setup Systemd Service
 echo "[5/5] Configuring systemd service..."
 PROJECT_PATH=$(pwd)
