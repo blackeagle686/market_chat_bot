@@ -6,9 +6,13 @@ set -e
 echo "--- Starting Native Deployment on mohamed-01095513686 (95.216.63.78) ---"
 
 # 1. Install System Dependencies
-echo "[1/5] Installing system dependencies (Python, Redis, FFmpeg, Git)..."
-sudo apt-get update -y
-sudo apt-get install -y python3-pip python3-venv redis-server ffmpeg git libmagic1
+echo "[1/5] Checking system dependencies..."
+for pkg in python3-pip python3-venv redis-server ffmpeg git libmagic1; do
+    if ! dpkg -s $pkg >/dev/null 2>&1; then
+        echo "Installing $pkg..."
+        sudo apt-get update -y && sudo apt-get install -y $pkg
+    fi
+done
 
 # 2. Start Redis
 echo "[2/5] Ensuring Redis is running..."
@@ -33,11 +37,16 @@ else
 fi
 
 # 4. Setup Virtual Environment and Requirements
-echo "[4/5] Setting up Python virtual environment..."
-python3 -m venv venv
+if [ ! -d "venv" ]; then
+    echo "[4/5] Creating new virtual environment..."
+    python3 -m venv venv
+else
+    echo "[4/5] Using existing virtual environment."
+fi
+
 source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+echo "Checking Python dependencies..."
+pip install -r requirements.txt --quiet
 
 # --- NEW STEP: Upload Data ---
 echo "[*] Uploading product data from Excel..."
