@@ -1409,81 +1409,134 @@ body.light-mode .input-group .form-control::placeholder {
 /* ========================================
    RESPONSIVE
 ======================================== */
-@media (max-width: 768px) {
-    /* Chat view */
-    .va-header { padding: 14px 16px; }
-    .va-title { display: none; }
-    .status-text { font-size: 1.8rem; margin-bottom: 28px; }
-    .mic-wrapper { width: 110px; height: 110px; margin-bottom: 32px; }
-    .mic-button { width: 66px; height: 66px; }
-    .inner-ring { width: 90px; height: 90px; }
-    .outer-ring { width: 110px; height: 110px; }
-    .va-footer { padding: 12px 16px; flex-direction: column; gap: 8px; }
-    .va-main { padding: 0 12px; }
-    /* On phone the chat fills the full content area edge-to-edge */
-    #chat-window-container { inset: 0; border-radius: 0; border-left: none; border-right: none; }
 
-    .catalog-btn { display: none; }
-    .suggestions-row { gap: 8px; }
-    .suggestion-chip { padding: 10px 14px; font-size: 0.85rem; }
-    .chat-window { padding: 16px; gap: 14px; }
-    .message { font-size: 0.95rem; padding: 12px 16px; }
-    
-    .message table {
-        display: block;
-        overflow-x: auto;
+/* ── TABLET (768px – 991px) ─────────────────────────── */
+@media (max-width: 991px) {
+    /* Splash — stack robot above card */
+    .splash { flex-direction: column; padding: 24px 20px; gap: 20px; }
+    .robot-wrapper { width: 200px; margin-bottom: 0; }
+    .robot-img { max-width: 180px; }
+    .lang-card { margin-left: 0; max-width: 400px; padding: 28px 32px; }
+
+    /* Voice assistant main */
+    .va-main { padding: 0 24px; }
+    .status-text { font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 36px; }
+    .mic-wrapper { width: clamp(130px, 18vw, 170px); height: clamp(130px, 18vw, 170px); margin-bottom: 48px; }
+    .va-footer { padding: 14px 24px; }
+
+    /* Suggestions */
+    .suggestions-row { gap: 10px; }
+    .suggestion-chip { padding: 10px 16px; font-size: 0.88rem; }
+}
+
+/* ── PHONE (max 767px) ────────────────────────────── */
+@media (max-width: 767px) {
+    /* —— Splash Screen —— */
+    .splash { flex-direction: column; padding: 16px; gap: 16px; align-items: center; }
+    .robot-wrapper { width: 140px; margin-bottom: 0; animation: none; }
+    .robot-img { max-width: 130px; }
+    .robot-glow { display: none; }
+    .lang-card {
+        margin-left: 0;
+        padding: 20px 18px;
+        max-width: 100%;
+        border-radius: 18px;
     }
-    
-    /* Exit Button Mobile */
-    .exit-btn {
-        top: 20px;
-        left: 20px;
-        padding: 6px 16px 6px 6px;
+    .lang-card-sparkle { font-size: 1.5rem; margin-bottom: 8px; }
+    .lang-card-title { font-size: 1.25rem; }
+    .lang-card-subtitle { font-size: 0.85rem; margin-bottom: 18px; }
+    .lang-buttons { gap: 8px; }
+    .lang-btn { padding: 10px 14px; font-size: 0.88rem; }
+    .feature-pills { display: none; }
+
+    /* —— Voice Assistant Main View —— */
+    .va-main {
+        padding: 16px 14px;
+        justify-content: center;
+        gap: 0;
+    }
+    .status-text {
+        font-size: 1.7rem;
+        margin-bottom: 24px;
+        letter-spacing: -0.5px;
+    }
+    .mic-wrapper {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 28px;
+    }
+    .transcript-preview {
+        font-size: 0.88rem;
+        margin-bottom: 24px;
+    }
+    .suggestions-section { gap: 10px; }
+    .suggestions-row { gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .suggestion-chip {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+    }
+
+    /* —— Footer —— */
+    .va-footer {
+        padding: 10px 14px;
+        flex-direction: row;
         gap: 8px;
     }
-    .icon-close {
-        width: 32px;
-        height: 32px;
-    }
-    .exit-text {
-        font-size: 0.65rem;
-    }
+    .footer-text { font-size: 0.65rem; letter-spacing: 1px; }
+    .logo { font-size: 0.95rem; }
 
-    /* Splash screen — stack vertically on mobile */
-    .splash { flex-direction: column; padding: 20px; }
-    .robot-wrapper { width: 180px; margin-bottom: 20px; }
-    .robot-img { max-width: 160px; }
-    .lang-card { margin-left: 0; padding: 24px 20px; max-width: 100%; }
-    .lang-card-title { font-size: 1.4rem; }
-    .lang-buttons { gap: 8px; }
-    .feature-pills { flex-direction: column; gap: 8px; align-items: center; bottom: 12px; }
-}
-
-@media (max-width: 480px) {
-    .lang-card { padding: 20px 16px; }
-    .lang-btn { padding: 10px 14px; font-size: 0.88rem; }
-    .status-text { font-size: 1.5rem; }
-    .footer-right .logo { font-size: 0.95rem; }
-    .footer-text { font-size: 0.65rem; }
-
-    /* Exit Button Extra Small */
+    /* —— Exit Button —— */
     .exit-btn {
-        top: 15px;
-        left: 15px;
+        top: 12px;
+        left: 12px;
         padding: 5px;
         border-radius: 50%;
+        gap: 0;
     }
-    .exit-text {
-        display: none;
+    .exit-text { display: none; }
+    .icon-close { width: 32px; height: 32px; }
+    .icon-close i { font-size: 0.85rem; }
+
+    /* —— Chat Window —— */
+    #chat-window-container {
+        inset: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
     }
-    .icon-close {
-        width: 36px;
-        height: 36px;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    .chat-header-inner { padding: 6px 12px; }
+    .close-chat { font-size: 0.75rem; padding: 5px 12px; }
+    .chat-window { padding: 12px; gap: 10px; }
+    .message {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+        max-width: 92%;
     }
+    .message table { display: block; overflow-x: auto; font-size: 0.8rem; }
+    .message th, .message td { padding: 7px 10px; }
+    .hidden-chat-form { padding: 8px 10px; }
+    .input-group { padding: 3px 4px; }
+    .input-group button.btn-mic-chat { width: 34px; height: 34px; font-size: 0.85rem; }
+    .input-group button.btn-send-chat { padding: 0 12px; height: 34px; font-size: 0.82rem; }
+
+    /* Hide extra chat info items */
+    .catalog-btn { display: none; }
 }
 
+/* ── SMALL PHONE (max 400px) ────────────────────────── */
+@media (max-width: 400px) {
+    .lang-card { padding: 16px 14px; }
+    .lang-card-title { font-size: 1.1rem; }
+    .status-text { font-size: 1.4rem; }
+    .mic-wrapper { width: 100px; height: 100px; }
+    .suggestion-chip { font-size: 0.75rem; padding: 7px 10px; }
+    .message { font-size: 0.85rem; }
+}
+
+/* ── LARGE TABLET (769px – 1024px) ───────────────────── */
 @media (min-width: 769px) and (max-width: 1024px) {
-    .robot-wrapper { width: 260px; }
-    .lang-card { padding: 32px 36px; margin-left: 16px; }
+    .robot-wrapper { width: 240px; }
+    .lang-card { padding: 30px 36px; margin-left: 16px; }
 }
