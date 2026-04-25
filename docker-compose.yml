@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G
+      - OPENAI_BASE_URL=https://api.longcat.chat/openai
+      - PORT=8000
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    image: "redis:alpine"
+    restart: always
+    ports:
+      - "6379:6379"
