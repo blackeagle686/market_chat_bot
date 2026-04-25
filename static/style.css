@@ -683,9 +683,12 @@ body.light-mode .icon-btn:hover {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 20px;
-    margin-top: -5vh; /* adjust visual center */
+    padding: 40px;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
     transition: opacity 0.3s ease;
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
 }
 
 .va-main.hidden {
@@ -695,32 +698,33 @@ body.light-mode .icon-btn:hover {
 
 .status-text {
     font-family: 'Outfit', sans-serif;
-    font-size: 3rem;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
     font-weight: 800;
-    letter-spacing: -1px;
-    margin-bottom: 50px;
-    background: linear-gradient(135deg, #bfdbfe, #60a5fa);
+    letter-spacing: -1.5px;
+    margin-bottom: 60px;
+    background: linear-gradient(135deg, #bfdbfe, #60a5fa, #3b82f6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     transition: all 0.3s ease;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 /* Mic Button */
 .mic-wrapper {
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: clamp(160px, 25vw, 240px);
+    height: clamp(160px, 25vw, 240px);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 60px;
+    margin-bottom: 80px;
 }
 
 .mic-button {
     position: relative;
     z-index: 10;
-    width: 90px;
-    height: 90px;
+    width: 60%;
+    height: 60%;
     border-radius: 50%;
     background: var(--green-button);
     border: none;
@@ -729,8 +733,13 @@ body.light-mode .icon-btn:hover {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 0 30px var(--green-glow);
-    transition: transform 0.2s ease, background 0.3s ease;
+    box-shadow: 0 0 50px var(--green-glow);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mic-button svg {
+    width: 40%;
+    height: 40%;
 }
 
 .mic-button:hover {
@@ -756,13 +765,13 @@ body.light-mode .mic-ring {
 }
 
 .inner-ring {
-    width: 130px;
-    height: 130px;
+    width: 85%;
+    height: 85%;
 }
 
 .outer-ring {
-    width: 160px;
-    height: 160px;
+    width: 100%;
+    height: 100%;
     opacity: 0.08;
 }
 
