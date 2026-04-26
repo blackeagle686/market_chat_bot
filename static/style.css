@@ -1356,14 +1356,23 @@ body.light-mode .input-group .form-control::placeholder {
 }
 
 .msg-product-image {
-    width: 100%;
-    max-width: 300px;
-    height: auto;
-    border-radius: 12px;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    background: white;
+    padding: 8px;
+    border-radius: 16px;
     margin-bottom: 12px;
     display: block;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.msg-product-image:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes pulse-small {
