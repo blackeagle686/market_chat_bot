@@ -155,14 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function setReplyContext(text) {
         currentReplyContext = text;
         const snippet = text.length > 50 ? text.substring(0, 50) + '...' : text;
-        replySnippet.innerText = `"${snippet}"`;
-        replyIndicator.classList.remove('d-none');
-        userInput.focus();
+        if (replySnippet) replySnippet.innerText = `"${snippet}"`;
+        if (replyIndicator) replyIndicator.classList.remove('d-none');
+        if (userInput) userInput.focus();
     }
 
     function clearReplyContext() {
         currentReplyContext = null;
-        replyIndicator.classList.add('d-none');
+        if (replyIndicator) replyIndicator.classList.add('d-none');
     }
 
     if (cancelReply) cancelReply.addEventListener('click', clearReplyContext);
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (chatForm) {
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            sendMessage(userInput.value);
+            if (userInput) sendMessage(userInput.value);
         });
     }
 
