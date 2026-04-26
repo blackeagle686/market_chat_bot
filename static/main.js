@@ -285,9 +285,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Strategy 1: Web Speech API (Chrome / Edge / Safari 17+) ─────────────
     function startWebSpeech() {
+        // Check for secure context (HTTPS or localhost) — required for mic
+        if (!window.isSecureContext) {
+            isRecording = false;
+            setRecordingUI('idle');
+            appendMessage(
+                '⚠️ Microphone requires a secure connection (HTTPS). ' +
+                'Please access this page over HTTPS or contact the administrator.',
+                'bot'
+            );
+            return;
+        }
+
         try {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) throw new Error("SpeechRecognition not supported in this browser");
+            if (!SpeechRecognition) throw new Error("SpeechRecognition not supported");
 
             recognition = new SpeechRecognition();
             
@@ -320,32 +332,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 const transcript = userInput ? userInput.value.trim() : "";
                 
                 if (wasRecording && transcript) {
-                    // Brief delay so user sees what was transcribed
-                    setTimeout(() => {
-                        sendMessage(transcript);
-                    }, 800);
+                    setTimeout(() => { sendMessage(transcript); }, 800);
                 }
             };
 
             recognition.onerror = (event) => {
-                console.warn('Web Speech error:', event.error);
+                console.warn('[Mic] Web Speech error:', event.error);
                 isRecording = false;
                 setRecordingUI('idle');
-                if (event.error !== 'no-speech') {
-                    appendMessage(`⚠️ Microphone error: ${event.error}`, 'bot');
-                    // Fallback to media recorder if permission was denied or some other error
-                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                        console.log("[Mic] Falling back to MediaRecorder strategy...");
-                    }
+
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    appendMessage(
+                        '🎤 Microphone access was denied. To fix this:\n\n' +
+                        '1. Click the 🔒 lock icon in your browser\'s address bar\n' +
+                        '2. Set **Microphone** to **Allow**\n' +
+                        '3. Refresh the page and try again.',
+                        'bot'
+                    );
+                } else if (event.error === 'network') {
+                    appendMessage('⚠️ Speech recognition network error. Trying microphone fallback...', 'bot');
+                    startMediaRecorder();
+                } else if (event.error !== 'no-speech') {
+                    appendMessage(`⚠️ Microphone error: ${event.error}. Please try again.`, 'bot');
                 }
             };
 
             recognition.start();
-            // Set UI state immediately to indicate starting
-            setRecordingUI('recording'); 
+            setRecordingUI('recording');
         } catch (e) {
-            console.error("[Mic] Web Speech failed:", e);
-            startMediaRecorder(); // Fallback
+            console.error("[Mic] Web Speech failed, trying MediaRecorder fallback:", e);
+            isRecording = false;
+            startMediaRecorder();
         }
     }
 
@@ -455,8 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
             stopRecordingAll();
         } else {
             console.log("[Mic] Starting recording...");
-            // Prevent rapid clicks from triggering multiple starts
-            isRecording = true; 
+            // Let onstart / startMediaRecorder set isRecording=true
+            // so a permission denial properly resets state
             if (hasWebSpeech) startWebSpeech();
             else startMediaRecorder();
         }
