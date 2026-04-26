@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    function appendMessage(text, side, isLoading = false, imageUrl = null) {
+    function appendMessage(text, side, isLoading = false, images = null) {
         showChatView();
         
         const msgDiv = document.createElement('div');
@@ -96,12 +96,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(processedText) : processedText;
             
-            if (imageUrl) {
+            if (images && Array.isArray(images) && images.length > 0) {
+                const imagesContainer = document.createElement('div');
+                imagesContainer.className = 'msg-images-container';
+                
+                images.forEach(imgData => {
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.className = 'msg-image-wrapper';
+                    
+                    const img = document.createElement('img');
+                    img.src = imgData.url;
+                    img.alt = imgData.name;
+                    img.className = 'msg-product-image';
+                    img.loading = 'lazy';
+                    
+                    const label = document.createElement('span');
+                    label.className = 'msg-image-label';
+                    label.textContent = imgData.name;
+                    
+                    imgWrapper.appendChild(img);
+                    imgWrapper.appendChild(label);
+                    imagesContainer.appendChild(imgWrapper);
+                });
+                
+                msgDiv.appendChild(imagesContainer);
+            } else if (images && typeof images === 'string') {
+                // Fallback for single image URL string
                 const img = document.createElement('img');
-                img.src = imageUrl;
+                img.src = images;
                 img.className = 'msg-product-image';
                 img.loading = 'lazy';
-                // Add click-to-enlarge if desired, but for now just show it
                 msgDiv.prepend(img);
             }
             
@@ -223,7 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatWindow.removeChild(loadingMsg);
             }
             
-            const msgElement = appendMessage(data.answer, 'bot', false, imageData.image_url);
+            // Combine explicitly requested image with automatically detected ones
+            let allImages = data.images || [];
+            if (imageData.image_url && !allImages.find(img => img.url === imageData.image_url)) {
+                allImages.unshift({ name: productNameForImage || "Product", url: imageData.image_url });
+            }
+
+            const msgElement = appendMessage(data.answer, 'bot', false, allImages);
             processTableActions(msgElement);
 
             // Actions row
