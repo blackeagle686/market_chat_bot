@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // UI Elements
+    // ── Constants & Support Checks ──────────────────────────────────────────
+    const hasWebSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    console.log("[Mic] Web Speech API supported:", hasWebSpeech);
+
+    // ── UI Elements ──────────────────────────────────────────────────────────
     const mainUi         = document.getElementById('main-ui');
     const vaMainView     = document.getElementById('va-main-view');
     const chatContainer  = document.getElementById('chat-window-container');
@@ -15,21 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const exitBtn        = document.getElementById('exit-btn');
     
     // Chat Elements
-    const chatForm      = document.getElementById('chat-form');
-    const chatWindow    = document.getElementById('chat-window');
-    const userInput     = document.getElementById('user-input');
+    const chatForm       = document.getElementById('chat-form');
+    const chatWindow     = document.getElementById('chat-window');
+    const userInput      = document.getElementById('user-input');
     const replyIndicator = document.getElementById('reply-indicator');
-    const replySnippet  = document.getElementById('reply-snippet');
-    const cancelReply   = document.getElementById('cancel-reply');
-    const chatMicBtn    = document.getElementById('chat-mic-btn');
+    const replySnippet   = document.getElementById('reply-snippet');
+    const cancelReply    = document.getElementById('cancel-reply');
+    const chatMicBtn     = document.getElementById('chat-mic-btn');
     
-    // Suggestions
-    // Suggestions handled by delegated listener at bottom
-    
-    // Theme Toggle is now handled globally in base.html
-    let currentReplyContext = null;
-    const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
-
     // ── Voice recording state ────────────────────────────────────────────────
     let isRecording = false;
     let recognition = null;   // Web Speech API instance
@@ -38,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     function showChatView() {
+        if (!chatContainer || !vaMainView) return;
         chatContainer.classList.remove('d-none');
         chatContainer.style.opacity = '1';
         chatContainer.style.pointerEvents = 'auto';
@@ -47,17 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hideChatView() {
+        if (!chatContainer || !vaMainView) return;
         chatContainer.classList.add('d-none');
         chatContainer.style.opacity = '0';
         chatContainer.style.pointerEvents = 'none';
         vaMainView.classList.remove('hidden');
         vaMainView.style.opacity = '1';
         vaMainView.style.pointerEvents = 'auto';
-        statusText.textContent = "Listening...";
-        transcriptPrev.classList.remove('visible');
+        if (statusText) statusText.textContent = "Listening...";
+        if (transcriptPrev) transcriptPrev.classList.remove('visible');
     }
 
-    closeChatBtn.addEventListener('click', hideChatView);
+    if (closeChatBtn) closeChatBtn.addEventListener('click', hideChatView);
 
     // Exit button removed from HTML — guard against null
     if (exitBtn) {
@@ -181,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearReplyContext();
         }
 
-        userInput.value = '';
+        if (userInput) userInput.value = '';
         appendMessage(displayUserText, 'user');
         const loadingMsg = appendMessage('', 'bot', true);
 
@@ -193,7 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/chat', { method: 'POST', body: formData });
             const data = await response.json();
 
-            chatWindow.removeChild(loadingMsg);
+            if (chatWindow && loadingMsg.parentNode === chatWindow) {
+                chatWindow.removeChild(loadingMsg);
+            }
+            
             const msgElement = appendMessage(data.answer, 'bot');
             processTableActions(msgElement);
 
@@ -212,8 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Audio playback button
             if (data.audio) {
                 const audio = new Audio(data.audio);
-                // audio.play() removed as per user request to default to paused
-
                 const playBtn = document.createElement('button');
                 playBtn.className = 'audio-btn';
                 playBtn.title = 'Pause/Play Audio';
@@ -229,7 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 actionsDiv.appendChild(playBtn);
             }
         } catch (error) {
-            chatWindow.removeChild(loadingMsg);
+            if (chatWindow && loadingMsg.parentNode === chatWindow) {
+                chatWindow.removeChild(loadingMsg);
+            }
             appendMessage('Sorry, I encountered an error. Please try again.', 'bot');
             console.error('Error:', error);
         }
@@ -246,90 +248,99 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Voice UI helpers ─────────────────────────────────────────────────────
     function setRecordingUI(state) {
         // state: 'idle' | 'recording' | 'transcribing'
-        mainMicWrapper.classList.remove('is-recording', 'is-transcribing');
-        chatMicBtn.classList.remove('recording');
+        if (mainMicWrapper) mainMicWrapper.classList.remove('is-recording', 'is-transcribing');
+        if (chatMicBtn) chatMicBtn.classList.remove('recording');
         
         if (state === 'idle') {
-            statusText.textContent = "Verdant Assistant";
-            footerEq.classList.remove('active');
-            footerText.textContent = "AWAITING VOICE INPUT";
-            transcriptPrev.classList.remove('visible');
+            if (statusText) statusText.textContent = "Verdant Assistant";
+            if (footerEq) footerEq.classList.remove('active');
+            if (footerText) footerText.textContent = "AWAITING VOICE INPUT";
+            if (transcriptPrev) transcriptPrev.classList.remove('visible');
+            if (userInput) userInput.placeholder = "Type your question...";
         } else if (state === 'recording') {
-            mainMicWrapper.classList.add('is-recording');
-            chatMicBtn.classList.add('recording');
-            statusText.textContent = "Listening...";
-            footerEq.classList.add('active');
-            footerText.textContent = "RECORDING...";
-            transcriptPrev.textContent = "...";
-            transcriptPrev.classList.add('visible');
-            userInput.placeholder = "Listening...";
+            if (mainMicWrapper) mainMicWrapper.classList.add('is-recording');
+            if (chatMicBtn) chatMicBtn.classList.add('recording');
+            if (statusText) statusText.textContent = "Listening...";
+            if (footerEq) footerEq.classList.add('active');
+            if (footerText) footerText.textContent = "RECORDING...";
+            if (transcriptPrev) {
+                transcriptPrev.textContent = "...";
+                transcriptPrev.classList.add('visible');
+            }
+            if (userInput) userInput.placeholder = "Listening...";
         } else if (state === 'transcribing') {
-            mainMicWrapper.classList.add('is-transcribing');
-            chatMicBtn.classList.add('recording'); // Keep red while transcribing
-            statusText.textContent = "Processing...";
-            footerEq.classList.remove('active');
-            footerText.textContent = "TRANSCRIBING...";
-            userInput.placeholder = "Processing...";
+            if (mainMicWrapper) mainMicWrapper.classList.add('is-transcribing');
+            if (chatMicBtn) chatMicBtn.classList.add('recording'); 
+            if (statusText) statusText.textContent = "Processing...";
+            if (footerEq) footerEq.classList.remove('active');
+            if (footerText) footerText.textContent = "TRANSCRIBING...";
+            if (userInput) userInput.placeholder = "Processing...";
         }
     }
 
     // ── Strategy 1: Web Speech API (Chrome / Edge / Safari 17+) ─────────────
     function startWebSpeech() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        
-        // Use document language (en or ar)
-        const docLang = document.documentElement.lang || 'en';
-        recognition.lang = docLang === 'ar' ? 'ar-SA' : 'en-US';
-        
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-        recognition.continuous = false;
-
-        recognition.onstart = () => {
-            isRecording = true;
-            setRecordingUI('recording');
-        };
-
-        recognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
-            }
-            transcriptPrev.textContent = '"' + transcript + '"';
-            userInput.value = transcript;
-        };
-
-        recognition.onend = () => {
-            isRecording = false;
-            setRecordingUI('idle');
-            const transcript = userInput.value.trim();
-            userInput.placeholder = "Type your question...";
-            
-            if (transcript) {
-                // Brief delay so user sees what was transcribed
-                setTimeout(() => {
-                    sendMessage(transcript);
-                }, 800);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            console.warn('Web Speech error:', event.error);
-            isRecording = false;
-            setRecordingUI('idle');
-            if (event.error !== 'no-speech') {
-                appendMessage(`⚠️ Microphone error: ${event.error}`, 'bot');
-            }
-        };
-
         try {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) throw new Error("SpeechRecognition not supported in this browser");
+
+            recognition = new SpeechRecognition();
+            
+            const docLang = document.documentElement.lang || 'en';
+            recognition.lang = docLang === 'ar' ? 'ar-SA' : 'en-US';
+            
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+            recognition.continuous = false;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                setRecordingUI('recording');
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                if (transcriptPrev) transcriptPrev.textContent = '"' + transcript + '"';
+                if (userInput) userInput.value = transcript;
+            };
+
+            recognition.onend = () => {
+                const wasRecording = isRecording;
+                isRecording = false;
+                setRecordingUI('idle');
+                
+                const transcript = userInput ? userInput.value.trim() : "";
+                
+                if (wasRecording && transcript) {
+                    // Brief delay so user sees what was transcribed
+                    setTimeout(() => {
+                        sendMessage(transcript);
+                    }, 800);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.warn('Web Speech error:', event.error);
+                isRecording = false;
+                setRecordingUI('idle');
+                if (event.error !== 'no-speech') {
+                    appendMessage(`⚠️ Microphone error: ${event.error}`, 'bot');
+                    // Fallback to media recorder if permission was denied or some other error
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        console.log("[Mic] Falling back to MediaRecorder strategy...");
+                    }
+                }
+            };
+
             recognition.start();
+            // Set UI state immediately to indicate starting
+            setRecordingUI('recording'); 
         } catch (e) {
-            console.error("[Mic] Recognition start failed:", e);
-            isRecording = false;
-            setRecordingUI('idle');
-            appendMessage(`⚠️ Could not start speech recognition: ${e.message || e}`, 'bot');
+            console.error("[Mic] Web Speech failed:", e);
+            startMediaRecorder(); // Fallback
         }
     }
 
@@ -408,8 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Mic button click handler ─────────────────────────────────────────────
-    const hasWebSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-    console.log("[Mic] Web Speech API supported:", hasWebSpeech);
+    // Event Listeners Moved to Top
 
     if (mainMicBtn) {
         mainMicBtn.addEventListener('click', () => {
@@ -435,13 +445,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function toggleRecording() {
-        if (!isRecording) {
+        if (isRecording) {
+            console.log("[Mic] Stopping recording manually...");
+            stopRecordingAll();
+        } else {
             console.log("[Mic] Starting recording...");
+            // Prevent rapid clicks from triggering multiple starts
+            isRecording = true; 
             if (hasWebSpeech) startWebSpeech();
             else startMediaRecorder();
-        } else {
-            console.log("[Mic] Stopping recording...");
-            stopRecordingAll();
         }
     }
 
