@@ -1355,6 +1355,17 @@ body.light-mode .input-group .form-control::placeholder {
     animation: pulse-small 1.5s infinite;
 }
 
+.msg-product-image {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: block;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 @keyframes pulse-small {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
     70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
