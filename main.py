@@ -118,7 +118,7 @@ api_key = os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G")
 base_url = os.getenv("OPENAI_BASE_URL", "https://api.longcat.chat/openai")
 bot = (ChatBot(local=False, vlm=False)
        .with_openai(api_key=api_key, base_url=base_url)
-       .with_rag("data_set.xlsx")
+       .with_rag("insight/data_set.xlsx")
        .with_memory()
        .with_system_prompt(
            "You are 'MarketAI', an intelligent question-answering assistant for a supermarket. "
@@ -175,8 +175,8 @@ async def startup_event():
     try:
         import pandas as pd
         # Load from Excel if RAG dataset exists (keep existing functionality)
-        if os.path.exists("final_rag_dataset.xlsx"):
-            df = pd.read_excel("final_rag_dataset.xlsx")
+        if os.path.exists("insight/data_set.xlsx"):
+            df = pd.read_excel("insight/data_set.xlsx")
             if "Product Name" in df.columns:
                 unique_products = df["Product Name"].dropna().unique().tolist()
                 PRODUCT_CATALOG = {str(p).lower().strip() for p in unique_products}

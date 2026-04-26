@@ -50,7 +50,7 @@ pip install -r requirements.txt --quiet
 
 # --- NEW STEP: Upload Data ---
 echo "[*] Uploading product data from Excel..."
-./venv/bin/python3 ./data/upload_data.py
+./venv/bin/python3 ./scripts/upload_data.py ./insight/data_set.xlsx
 # -----------------------------
 
 # 5. Setup Systemd Service
