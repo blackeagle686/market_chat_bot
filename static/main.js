@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    function appendMessage(text, side, isLoading = false) {
+    function appendMessage(text, side, isLoading = false, imageUrl = null) {
         showChatView();
         
         const msgDiv = document.createElement('div');
@@ -95,6 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(processedText) : processedText;
+            
+            if (imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.className = 'msg-product-image';
+                img.loading = 'lazy';
+                // Add click-to-enlarge if desired, but for now just show it
+                msgDiv.prepend(img);
+            }
             
             if (suggestions.length > 0) {
                 renderSuggestions(suggestions, msgDiv);
@@ -146,8 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     infoBtn.innerHTML = '<i class="bi bi-info-circle"></i>';
                     infoBtn.title = 'Get more info about this product';
                     
+                    const productName = row.cells[0].textContent.trim();
+                    
                     infoBtn.onclick = () => {
-                        sendMessage(`Tell me more information and a detailed description about this product: ${rowData}`);
+                        sendMessage(`Tell me more information and a detailed description about this product: ${productName}`, productName);
                     };
                     
                     td.appendChild(infoBtn);
@@ -173,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelReply) cancelReply.addEventListener('click', clearReplyContext);
 
     // ── Send a message text ──────────────────────────────────────────────────
-    async function sendMessage(text) {
+    async function sendMessage(text, productNameForImage = null) {
         text = text.trim();
         if (!text) return;
 
@@ -190,18 +201,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingMsg = appendMessage('', 'bot', true);
 
         try {
-            const formData = new FormData();
-            formData.append('text', text);
-            formData.append('session_id', sessionId);
+            // Concurrent tasks: fetch chat response and product image (if needed)
+            const chatPromise = (async () => {
+                const formData = new FormData();
+                formData.append('text', text);
+                formData.append('session_id', sessionId);
+                const response = await fetch('/chat', { method: 'POST', body: formData });
+                return await response.json();
+            })();
 
-            const response = await fetch('/chat', { method: 'POST', body: formData });
-            const data = await response.json();
+            let imagePromise = Promise.resolve({ image_url: null });
+            if (productNameForImage) {
+                imagePromise = fetch(`/api/product_image?name=${encodeURIComponent(productNameForImage)}`)
+                    .then(r => r.json())
+                    .catch(() => ({ image_url: null }));
+            }
+
+            const [data, imageData] = await Promise.all([chatPromise, imagePromise]);
 
             if (chatWindow && loadingMsg.parentNode === chatWindow) {
                 chatWindow.removeChild(loadingMsg);
             }
             
-            const msgElement = appendMessage(data.answer, 'bot');
+            const msgElement = appendMessage(data.answer, 'bot', false, imageData.image_url);
             processTableActions(msgElement);
 
             // Actions row

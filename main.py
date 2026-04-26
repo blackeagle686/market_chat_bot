@@ -474,6 +474,18 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
         print(f"TTS Error: {e}")
         return {"answer": response, "partition": extract_partition_number(response)}
 
+@app.get("/api/product_image")
+async def get_product_image(name: str, db: Session = Depends(get_db)):
+    """
+    Returns the image_url for a product given its name.
+    Uses fuzzy matching (LIKE) to find the best match.
+    """
+    # Simple case-insensitive partial match
+    product = db.query(Product).filter(Product.name.ilike(f"%{name}%")).first()
+    if product and product.image_url:
+        return {"image_url": product.image_url}
+    return {"image_url": None}
+
 @app.post("/transcribe")
 async def transcribe(audio: UploadFile = File(...), lang: str = Form("en")):
     """
