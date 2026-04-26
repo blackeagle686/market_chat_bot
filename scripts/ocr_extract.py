@@ -89,9 +89,9 @@ def main():
         })
 
     # Save results to a CSV
-    df = pd.DataFrame(results)
-    df.to_csv('ocr_results.csv', index=False, encoding='utf-8-sig')
-    print("\nOCR extraction complete. Results saved to 'ocr_results.csv'.")
+    os.makedirs('insight', exist_ok=True)
+    df.to_csv('insight/ocr_results.csv', index=False, encoding='utf-8-sig')
+    print("\nOCR extraction complete. Results saved to 'insight/ocr_results.csv'.")
     
     # Display results
     print("\nSample Results:")
