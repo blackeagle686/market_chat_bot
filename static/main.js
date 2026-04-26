@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let mediaRecorder = null; // MediaRecorder fallback
     let audioChunks  = [];
 
+    // ── Session & Reply State ─────────────────────────────────────────────────
+    let currentReplyContext = null;
+    const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+
+
     // ── Helpers ──────────────────────────────────────────────────────────────
     function showChatView() {
         if (!chatContainer || !vaMainView) return;
