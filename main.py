@@ -99,6 +99,41 @@ def extract_partition_number(text: str) -> int:
                     
     return 0
 
+def extract_product_names_from_text(text: str) -> list:
+    """
+    Extracts product names from the LLM's Markdown response.
+    Specifically looks inside Markdown tables and lists.
+    """
+    names = []
+    lines = text.split('\n')
+    for line in lines:
+        # Check in tables
+        if '|' in line:
+            parts = [p.strip() for p in line.split('|') if p.strip()]
+            if len(parts) >= 1:
+                name = parts[0]
+                # Filter out headers and separators
+                if name.lower() not in ["product name", "item", "name", "---"] and not all(c == '-' for c in name):
+                    if len(name) > 2: # Ignore very short strings
+                        names.append(name)
+        # Check in bullet points or numbered lists
+        elif re.match(r'^[\*\-\d\.]+\s+(.+)', line):
+            match = re.match(r'^[\*\-\d\.]+\s+(.+)', line)
+            name = match.group(1).strip()
+            # Basic heuristic: if it looks like a product name (not too long, starts with a capital or number)
+            if 0 < len(name) < 50:
+                names.append(name)
+    
+    # Also search for known products from the catalog in the entire text if no names found in structures
+    if not names:
+        # This is expensive if the catalog is huge, but let's do a simple check
+        # Limit to top 5 matches to avoid spamming
+        pass
+
+    # Unique names only, preserving order
+    seen = set()
+    return [x for x in names if not (x.lower() in seen or seen.add(x.lower()))]
+
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(title="Market AI ChatBot")
@@ -465,14 +500,33 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
         tts.save(audio_path)
         
         partition = extract_partition_number(response)
+        
+        # --- Automatic Product Image Detection ---
+        product_names = extract_product_names_from_text(response)
+        detected_images = []
+        if product_names:
+            db = SessionLocal()
+            try:
+                for name in product_names[:5]: # Limit to 5 images to avoid clutter
+                    product = db.query(Product).filter(Product.name.ilike(f"%{name}%")).first()
+                    if product and product.image_url:
+                        detected_images.append({
+                            "name": product.name,
+                            "url": product.image_url
+                        })
+            finally:
+                db.close()
+        # -----------------------------------------
+
         return {
             "answer": response, 
             "audio": f"/static/audio/{audio_filename}",
-            "partition": partition
+            "partition": partition,
+            "images": detected_images
         }
     except Exception as e:
         print(f"TTS Error: {e}")
-        return {"answer": response, "partition": extract_partition_number(response)}
+        return {"answer": response, "partition": extract_partition_number(response), "images": []}
 
 @app.get("/api/product_image")
 async def get_product_image(name: str, db: Session = Depends(get_db)):
