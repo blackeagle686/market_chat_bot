@@ -51,7 +51,7 @@ pip install pyngrok --quiet
 
 # --- NEW STEP: Upload Data ---
 echo "[*] Uploading product data from Excel..."
-./venv/bin/python3 ./scripts/upload_data.py ./insight/data_set.xlsx
+PYTHONPATH=. ./venv/bin/python3 ./scripts/upload_data.py ./insight/data_set.xlsx
 # -----------------------------
 
 # 5. Setup Systemd Services

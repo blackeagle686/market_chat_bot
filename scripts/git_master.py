@@ -46,7 +46,7 @@ def auto_push():
 
     print("[+] Successfully pushed to master! Cheers brother.")
 
-def monitor_and_push(interval=30):
+def monitor_and_push(interval=10):
     print(f"[*] Monitoring for changes every {interval} seconds... Press Ctrl+C to stop.")
     while True:
         try:
