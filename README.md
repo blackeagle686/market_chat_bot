@@ -1,5 +1,6 @@
 # 🛒 MarketAI: Smart Supermarket Assistant
 
+
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![IRYM SDK](https://img.shields.io/badge/IRYM_SDK-AI_Framework-blueviolet?style=for-the-badge)](https://github.com/blackeagle686/IRYM_sdk)
 [![OpenAI](https://img.shields.io/badge/OpenAI-LLM-green?style=for-the-badge&logo=openai)](https://openai.com/)
