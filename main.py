@@ -477,10 +477,16 @@ async def read_item(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/chat")
-async def chat(text: str = Form(...), session_id: str = Form("default")):
+async def chat(request: Request, text: str = Form(...), session_id: str = Form("default")):
     # Correct STT mishearings before processing
     corrected_text = apply_query_corrections(text)
     response = await bot.set_session(session_id).chat(corrected_text)
+
+    # Persist last bot response in session for 'take me there' flow
+    try:
+        request.session[f"last_response_{session_id}"] = response
+    except Exception:
+        pass
     
     # Ensure audio directory exists
     audio_dir = os.path.join("static", "audio")
@@ -527,6 +533,28 @@ async def chat(text: str = Form(...), session_id: str = Form("default")):
     except Exception as e:
         print(f"TTS Error: {e}")
         return {"answer": response, "partition": extract_partition_number(response), "images": []}
+
+
+@app.post("/take_me_there")
+async def take_me_there(request: Request, text: str = Form(...), session_id: str = Form("default"), last_response: str = Form(None)):
+    """
+    When the user says exactly 'take me there' (case-insensitive), return the partition
+    number extracted from the last bot response stored in session or from the provided
+    `last_response` override.
+
+    Response shape: {"message": PartitionNumber_INT}
+    """
+    if not text or text.strip().lower() != "take me there":
+        return JSONResponse({"error": "invalid trigger"}, status_code=400)
+
+    bot_text = last_response or request.session.get(f"last_response_{session_id}", "")
+    partition = extract_partition_number(bot_text)
+    try:
+        partition_int = int(partition)
+    except Exception:
+        partition_int = 0
+
+    return {"message": partition_int}
 
 @app.get("/api/product_image")
 async def get_product_image(name: str, db: Session = Depends(get_db)):
