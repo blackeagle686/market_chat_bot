@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, Category, Product, User, init_db
 from fastapi.responses import RedirectResponse
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, db as fdb
 
 def clean_text_for_speech(text: str) -> str:
     """Removes Markdown symbols and adds descriptive words for prices/partitions."""
@@ -523,7 +523,7 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
             # Update Firebase only if valid partition found
             if firebase_initialized:
                 try:
-                    ref = db.reference('/')
+                    ref = fdb.reference('/')
                     ref.update({"partition": int(partition)})
                     print(f"[Firebase] Navigation updated to partition {partition}")
                 except Exception as e:
