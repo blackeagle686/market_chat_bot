@@ -14,6 +14,8 @@ import uuid
 from sqlalchemy.orm import Session
 from database import SessionLocal, Category, Product, User, init_db
 from fastapi.responses import RedirectResponse
+import firebase_admin
+from firebase_admin import credentials, db
 
 def clean_text_for_speech(text: str) -> str:
     """Removes Markdown symbols and adds descriptive words for prices/partitions."""
@@ -139,6 +141,12 @@ def extract_product_names_from_text(text: str) -> list:
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(title="Market AI ChatBot")
+
+# Initialize Firebase
+cred = credentials.Certificate("super-market-c5327-firebase-adminsdk-fbsvc-b372f0f73c.json")
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://super-market-c5327-default-rtdb.europe-west1.firebasedatabase.app/'
+})
 
 # Session middleware for admin authentication
 app.add_middleware(SessionMiddleware, secret_key="super-secret-key-change-me")
@@ -584,6 +592,13 @@ async def take_me_there(
         partition_int = int(partition)
     except Exception:
         partition_int = 0
+
+    # Send to Firebase
+    try:
+        ref = db.reference('/')
+        ref.update({"partition": partition_int})
+    except Exception as e:
+        print(f"[Firebase Error] Failed to update partition: {e}")
 
     return {"message": partition_int}
     

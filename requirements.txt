@@ -16,4 +16,5 @@ rapidfuzz
 sentence-transformers
 itsdangerous
 python-jose[cryptography]
+firebase-admin
 
