@@ -504,17 +504,35 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
     # Correct STT mishearings before processing
     corrected_text = apply_query_corrections(text)
     
-    # Handle "Take me there" trigger directly in chat
-    if corrected_text.strip().lower() == "take me there":
-        # Get last response from global fallback or session
-        bot_text = LAST_CHAT_RESPONSES.get(session_id, "")
+    # Handle "Take me there" trigger (supporting "Reply" context)
+    clean_query = corrected_text.strip().lower()
+    reply_context_text = ""
+    
+    # If this is a reply, extract the quoted context and the actual question
+    if "user is replying to this previous message:" in clean_query:
+        try:
+            # Extract text between quotes in the reply header
+            import re
+            context_match = re.search(r'previous message: "(.*?)"', corrected_text, re.DOTALL | re.IGNORECASE)
+            if context_match:
+                reply_context_text = context_match.group(1)
+            
+            # The actual question is after "Question:"
+            if "question:" in clean_query:
+                clean_query = clean_query.split("question:")[-1].strip()
+        except Exception:
+            pass
+
+    if clean_query == "take_me_there" or clean_query == "take me there":
+        # Strategy: Use reply context first, then global fallback, then session
+        bot_text = reply_context_text or LAST_CHAT_RESPONSES.get(session_id, "")
         if not bot_text:
             try:
                 bot_text = request.session.get(f"last_response_{session_id}", "")
             except Exception:
                 pass
         
-        print(f"[Debug] 'Take me there' triggered. Session ID: {session_id}. Last response found: {bool(bot_text)}")
+        print(f"[Debug] 'Take me there' triggered. Reply Context used: {bool(reply_context_text)}")
             
         partition = extract_partition_number(bot_text)
         
