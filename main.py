@@ -1,6 +1,8 @@
 import os
 import re
-from fastapi import FastAPI, Request, Form, UploadFile, File, Depends
+from fastapi import FastAPI, Request, Form, UploadFile, File, Depends, Body
+from pydantic import BaseModel
+from typing import Optional
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -535,27 +537,56 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
         return {"answer": response, "partition": extract_partition_number(response), "images": []}
 
 
+class TakeMeThereRequest(BaseModel):
+    text: str
+    session_id: str = "default"
+    last_response: Optional[str] = None
+
+
 @app.post("/take_me_there")
-async def take_me_there(request: Request, text: str = Form(...), session_id: str = Form("default"), last_response: str = Form(None)):
-    """
-    When the user says exactly 'take me there' (case-insensitive), return the partition
-    number extracted from the last bot response stored in session or from the provided
-    `last_response` override.
+async def take_me_there(
+    request: Request,
+    text: Optional[str] = Form(None),
+    session_id: str = Form("default"),
+    last_response: Optional[str] = Form(None),
+    data: Optional[TakeMeThereRequest] = Body(None)
+):
 
-    Response shape: {"message": PartitionNumber_INT}
-    """
+    # JSON overrides form data
+    if data is not None:
+        text = data.text
+        session_id = data.session_id
+        last_response = data.last_response
+
+    # Validate trigger
     if not text or text.strip().lower() != "take me there":
-        return JSONResponse({"error": "invalid trigger"}, status_code=400)
+        return JSONResponse(
+            {"error": "invalid trigger"},
+            status_code=400
+        )
 
-    bot_text = last_response or request.session.get(f"last_response_{session_id}", "")
+    # Prefer explicit last_response
+    bot_text = last_response
+
+    # Fallback to session
+    if not bot_text:
+        try:
+            bot_text = request.session.get(
+                f"last_response_{session_id}",
+                ""
+            )
+        except Exception:
+            bot_text = ""
+
     partition = extract_partition_number(bot_text)
+
     try:
         partition_int = int(partition)
     except Exception:
         partition_int = 0
 
     return {"message": partition_int}
-
+    
 @app.get("/api/product_image")
 async def get_product_image(name: str, db: Session = Depends(get_db)):
     """
