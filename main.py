@@ -582,11 +582,21 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
             "answer": response, 
             "audio": f"/static/audio/{audio_filename}",
             "partition": partition,
-            "images": detected_images
+            "images": detected_images,
+            "firebase_status": firebase_initialized,
+            "debug": {
+                "session_id": session_id,
+                "partition_found": partition > 0
+            }
         }
     except Exception as e:
         print(f"TTS Error: {e}")
-        return {"answer": response, "partition": extract_partition_number(response), "images": []}
+        return {
+            "answer": response, 
+            "partition": extract_partition_number(response), 
+            "images": [],
+            "firebase_status": firebase_initialized
+        }
 
     
 @app.get("/api/product_image")
