@@ -143,10 +143,21 @@ from starlette.middleware.sessions import SessionMiddleware
 app = FastAPI(title="Market AI ChatBot")
 
 # Initialize Firebase
-cred = credentials.Certificate("super-market-c5327-firebase-adminsdk-fbsvc-b372f0f73c.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://super-market-c5327-default-rtdb.europe-west1.firebasedatabase.app/'
-})
+firebase_initialized = False
+firebase_creds_path = "super-market-c5327-firebase-adminsdk-fbsvc-b372f0f73c.json"
+
+if os.path.exists(firebase_creds_path):
+    try:
+        cred = credentials.Certificate(firebase_creds_path)
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://super-market-c5327-default-rtdb.europe-west1.firebasedatabase.app/'
+        })
+        firebase_initialized = True
+        print("[+] Firebase initialized successfully.")
+    except Exception as e:
+        print(f"[-] Firebase initialization error: {e}")
+else:
+    print(f"[!] Firebase credentials file NOT FOUND at {firebase_creds_path}. Firebase features will be disabled.")
 
 # Session middleware for admin authentication
 app.add_middleware(SessionMiddleware, secret_key="super-secret-key-change-me")
@@ -594,11 +605,14 @@ async def take_me_there(
         partition_int = 0
 
     # Send to Firebase
-    try:
-        ref = db.reference('/')
-        ref.update({"partition": partition_int})
-    except Exception as e:
-        print(f"[Firebase Error] Failed to update partition: {e}")
+    if firebase_initialized:
+        try:
+            ref = db.reference('/')
+            ref.update({"partition": partition_int})
+        except Exception as e:
+            print(f"[Firebase Error] Failed to update partition: {e}")
+    else:
+        print("[!] Skipping Firebase update: SDK not initialized.")
 
     return {"message": partition_int}
     
