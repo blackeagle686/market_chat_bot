@@ -25,3 +25,11 @@ static/audio/*.mp3
 
 # Excel temporary files
 # ~$*.xlsx
+
+# Secrets and Credentials
+*.json
+!stt_corrections.json
+!package.json
+!composer.json
+!tsconfig.json
+!jsconfig.json
