@@ -35,7 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Session & Reply State ─────────────────────────────────────────────────
     let currentReplyContext = null;
-    const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    
+    // Use persistent session ID from localStorage
+    let sessionId = localStorage.getItem('market_chat_session_id');
+    if (!sessionId) {
+        sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('market_chat_session_id', sessionId);
+    }
+    console.log("[Session] Active Session ID:", sessionId);
 
 
     // ── Helpers ──────────────────────────────────────────────────────────────
