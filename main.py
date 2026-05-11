@@ -196,6 +196,8 @@ bot = (ChatBot(local=False, vlm=False)
 
 # Global product catalog for fuzzy matching
 PRODUCT_CATALOG = set()
+# Global fallback for sessions to store last responses per session_id
+LAST_CHAT_RESPONSES = {}
 
 # Dependency to get DB session
 def get_db():
@@ -504,28 +506,37 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
     
     # Handle "Take me there" trigger directly in chat
     if corrected_text.strip().lower() == "take me there":
-        # Get last response from session to find the partition
-        bot_text = ""
-        try:
-            bot_text = request.session.get(f"last_response_{session_id}", "")
-        except Exception:
-            pass
+        # Get last response from global fallback or session
+        bot_text = LAST_CHAT_RESPONSES.get(session_id, "")
+        if not bot_text:
+            try:
+                bot_text = request.session.get(f"last_response_{session_id}", "")
+            except Exception:
+                pass
+        
+        print(f"[Debug] 'Take me there' triggered. Session ID: {session_id}. Last response found: {bool(bot_text)}")
             
         partition = extract_partition_number(bot_text)
-        response = f"Sure, I am taking you to partition {partition}." if partition > 0 else "I'm sorry, I couldn't find a partition number to navigate to."
         
-        # Update Firebase
-        if firebase_initialized:
-            try:
-                ref = db.reference('/')
-                ref.update({"partition": int(partition)})
-                print(f"[Firebase] Navigation updated to partition {partition}")
-            except Exception as e:
-                print(f"[Firebase Error] Failed to update partition: {e}")
+        if partition > 0:
+            response = f"Sure, I am taking you to partition {partition}."
+            # Update Firebase only if valid partition found
+            if firebase_initialized:
+                try:
+                    ref = db.reference('/')
+                    ref.update({"partition": int(partition)})
+                    print(f"[Firebase] Navigation updated to partition {partition}")
+                except Exception as e:
+                    print(f"[Firebase Error] Failed to update partition: {e}")
+        else:
+            response = "I'm sorry, I couldn't find a partition number in our previous conversation to navigate to."
+            print(f"[Warning] No partition found in text: '{bot_text[:50]}...'")
     else:
         # Normal chat processing
         response = await bot.set_session(session_id).chat(corrected_text)
-        # Persist last bot response in session for future 'take me there' commands
+        
+        # Persist last bot response in both session and global fallback
+        LAST_CHAT_RESPONSES[session_id] = response
         try:
             request.session[f"last_response_{session_id}"] = response
         except Exception:
