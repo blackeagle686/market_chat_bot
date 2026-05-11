@@ -501,13 +501,35 @@ async def read_item(request: Request):
 async def chat(request: Request, text: str = Form(...), session_id: str = Form("default")):
     # Correct STT mishearings before processing
     corrected_text = apply_query_corrections(text)
-    response = await bot.set_session(session_id).chat(corrected_text)
-
-    # Persist last bot response in session for 'take me there' flow
-    try:
-        request.session[f"last_response_{session_id}"] = response
-    except Exception:
-        pass
+    
+    # Handle "Take me there" trigger directly in chat
+    if corrected_text.strip().lower() == "take me there":
+        # Get last response from session to find the partition
+        bot_text = ""
+        try:
+            bot_text = request.session.get(f"last_response_{session_id}", "")
+        except Exception:
+            pass
+            
+        partition = extract_partition_number(bot_text)
+        response = f"Sure, I am taking you to partition {partition}." if partition > 0 else "I'm sorry, I couldn't find a partition number to navigate to."
+        
+        # Update Firebase
+        if firebase_initialized:
+            try:
+                ref = db.reference('/')
+                ref.update({"partition": int(partition)})
+                print(f"[Firebase] Navigation updated to partition {partition}")
+            except Exception as e:
+                print(f"[Firebase Error] Failed to update partition: {e}")
+    else:
+        # Normal chat processing
+        response = await bot.set_session(session_id).chat(corrected_text)
+        # Persist last bot response in session for future 'take me there' commands
+        try:
+            request.session[f"last_response_{session_id}"] = response
+        except Exception:
+            pass
     
     # Ensure audio directory exists
     audio_dir = os.path.join("static", "audio")
@@ -555,66 +577,6 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
         print(f"TTS Error: {e}")
         return {"answer": response, "partition": extract_partition_number(response), "images": []}
 
-
-class TakeMeThereRequest(BaseModel):
-    text: str
-    session_id: str = "default"
-    last_response: Optional[str] = None
-
-
-@app.post("/take_me_there")
-async def take_me_there(
-    request: Request,
-    text: Optional[str] = Form(None),
-    session_id: str = Form("default"),
-    last_response: Optional[str] = Form(None),
-    data: Optional[TakeMeThereRequest] = Body(None)
-):
-
-    # JSON overrides form data
-    if data is not None:
-        text = data.text
-        session_id = data.session_id
-        last_response = data.last_response
-
-    # Validate trigger
-    if not text or text.strip().lower() != "take me there":
-        return JSONResponse(
-            {"error": "invalid trigger"},
-            status_code=400
-        )
-
-    # Prefer explicit last_response
-    bot_text = last_response
-
-    # Fallback to session
-    if not bot_text:
-        try:
-            bot_text = request.session.get(
-                f"last_response_{session_id}",
-                ""
-            )
-        except Exception:
-            bot_text = ""
-
-    partition = extract_partition_number(bot_text)
-
-    try:
-        partition_int = int(partition)
-    except Exception:
-        partition_int = 0
-
-    # Send to Firebase
-    if firebase_initialized:
-        try:
-            ref = db.reference('/')
-            ref.update({"partition": partition_int})
-        except Exception as e:
-            print(f"[Firebase Error] Failed to update partition: {e}")
-    else:
-        print("[!] Skipping Firebase update: SDK not initialized.")
-
-    return {"message": partition_int}
     
 @app.get("/api/product_image")
 async def get_product_image(name: str, db: Session = Depends(get_db)):
