@@ -37,12 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentReplyContext = null;
     let pendingMessage = null; // Stash query when age verification is triggered
     
-    // Use persistent session ID from localStorage
-    let sessionId = localStorage.getItem('market_chat_session_id');
-    if (!sessionId) {
-        sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('market_chat_session_id', sessionId);
-    }
+    // Clear age verification on fresh page load (kiosk terminal security check)
+    localStorage.removeItem('age_verified');
+
+    // Generate a fresh session ID on every page load for a new customer
+    let sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('market_chat_session_id', sessionId);
     console.log("[Session] Active Session ID:", sessionId);
 
 
