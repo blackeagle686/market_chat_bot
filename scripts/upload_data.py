@@ -18,7 +18,7 @@ COLUMN_MAP = {
 
 def normalize_columns(columns):
     normalized = {col.strip(): col.strip() for col in columns}
-    return normalizedUU
+    return normalized
 
 
 def find_column(df_columns, names):

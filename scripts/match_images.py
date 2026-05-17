@@ -5,18 +5,18 @@ import os
 
 def create_mapping():
     # Load OCR results
-    if not os.path.exists('ocr_results.csv'):
-        print("ocr_results.csv not found!")
+    if not os.path.exists('insight/ocr_results.csv'):
+        print("ocr_results.csv not found in insight/!")
         return
     
-    ocr_df = pd.read_csv('ocr_results.csv')
+    ocr_df = pd.read_csv('insight/ocr_results.csv')
     
     # Load Excel data
-    if not os.path.exists('data_set.xlsx'):
-        print("data_set.xlsx not found!")
+    if not os.path.exists('insight/data_set.xlsx'):
+        print("data_set.xlsx not found in insight/!")
         return
     
-    excel_df = pd.read_excel('data_set.xlsx')
+    excel_df = pd.read_excel('insight/data_set.xlsx')
     
     # Standardize column names for Excel
     # Product Name (Brand), Price (EGP), Description, Partition, Unnamed: 4
