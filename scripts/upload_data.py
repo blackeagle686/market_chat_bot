@@ -181,8 +181,13 @@ def upload_data(excel_file, sheet_name=None):
             product_name = str(get_value(row, mapped_columns, "name", "")).strip()
             product_image_url = None
             
-            # Direct mapping: match image filename by product ID (index + 1)
-            row_num = index + 1
+            # Direct mapping: match image filename by product ID (partition-aware offset)
+            # Partition 1 (indices 0 to 24) maps to index + 1
+            # Partition 2 and higher (indices 26+) maps to index + 2 (Excel Row Number)
+            if index <= 24:
+                row_num = index + 1
+            else:
+                row_num = index + 2
             image_filename = None
             for ext in ['.jpeg', '.jpg', '.png']:
                 potential_name = f"{row_num}{ext}"
