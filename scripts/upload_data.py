@@ -128,6 +128,12 @@ def upload_data(excel_file, sheet_name=None):
     init_db()
     db = SessionLocal()
     try:
+        # Clear existing Product and Category tables to prevent duplicates or leftover old names
+        print("Clearing existing products and categories from database...")
+        db.query(Product).delete()
+        db.query(Category).delete()
+        db.commit()
+
         df = load_excel(excel_file, sheet_name=sheet_name)
         df.columns = [str(c).strip() for c in df.columns]
         mapped_columns = map_columns(df)
