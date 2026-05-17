@@ -569,6 +569,16 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
         # Normal chat processing
         response = await bot.set_session(session_id).chat(corrected_text)
         
+        # Second-layer check: If the LLM response contains energy drink keywords and user is not verified
+        response_lower = response.lower()
+        contains_energy_drink_response = any(keyword in response_lower for keyword in ENERGY_DRINK_KEYWORDS)
+        
+        if contains_energy_drink_response and age_verified != "true":
+            return {
+                "status": "requires_age_verification",
+                "message": "This response contains products that require you to be 18 years or older. Please verify your age."
+            }
+        
         # Persist last bot response in both session and global fallback
         LAST_CHAT_RESPONSES[session_id] = response
         try:
