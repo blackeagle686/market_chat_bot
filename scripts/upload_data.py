@@ -181,13 +181,20 @@ def upload_data(excel_file, sheet_name=None):
             product_name = str(get_value(row, mapped_columns, "name", "")).strip()
             product_image_url = None
             
-            # Simple sequential mapping: product at index matches image at index
-            if index < len(all_images):
-                image_filename = all_images[index]
+            # Direct mapping: match image filename by product ID (index + 1)
+            row_num = index + 1
+            image_filename = None
+            for ext in ['.jpeg', '.jpg', '.png']:
+                potential_name = f"{row_num}{ext}"
+                if potential_name in all_images:
+                    image_filename = potential_name
+                    break
+            
+            if image_filename:
                 source_path = os.path.join(image_source_dir, image_filename)
                 
                 # Copy image to static/uploads
-                target_filename = f"product_{index + 1}_{image_filename}"
+                target_filename = f"product_{row_num}_{image_filename}"
                 target_path = os.path.join(image_target_dir, target_filename)
                 shutil.copy2(source_path, target_path)
                 product_image_url = f"/static/uploads/{target_filename}"
