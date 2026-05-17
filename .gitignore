@@ -8,6 +8,10 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+**/__pycache__/
+
+# Scratch scripts
+scratch/
 
 # Database
 *.db

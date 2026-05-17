@@ -500,9 +500,25 @@ async def read_item(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/chat")
-async def chat(request: Request, text: str = Form(...), session_id: str = Form("default")):
+async def chat(request: Request, text: str = Form(...), session_id: str = Form("default"), age_verified: str = Form("false")):
     # Correct STT mishearings before processing
     corrected_text = apply_query_corrections(text)
+    
+    # Age verification check for energy drinks
+    ENERGY_DRINK_KEYWORDS = [
+        "energy drink", "red bull", "redbull", "sting", "power horse", 
+        "monster energy", "bison", "مشروب طاقة", "مشروبات طاقة", 
+        "ريد بول", "ريدبول", "ستنج", "باور هورس", "مشروب الطاقة"
+    ]
+    query_lower = corrected_text.lower()
+    contains_energy_drink = any(keyword in query_lower for keyword in ENERGY_DRINK_KEYWORDS)
+    
+    if contains_energy_drink and age_verified != "true":
+        return {
+            "status": "requires_age_verification",
+            "message": "This search contains products that require you to be 18 years or older. Please verify your age."
+        }
+
     
     # Handle "Take me there" trigger (supporting "Reply" context)
     clean_query = corrected_text.strip().lower()

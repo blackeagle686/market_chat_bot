@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Session & Reply State ─────────────────────────────────────────────────
     let currentReplyContext = null;
+    let pendingMessage = null; // Stash query when age verification is triggered
     
     // Use persistent session ID from localStorage
     let sessionId = localStorage.getItem('market_chat_session_id');
@@ -237,6 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append('text', text);
                 formData.append('session_id', sessionId);
+                const isVerified = localStorage.getItem('age_verified') === 'true';
+                formData.append('age_verified', isVerified ? 'true' : 'false');
                 const response = await fetch('/chat', { method: 'POST', body: formData });
                 return await response.json();
             })();
@@ -249,6 +252,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const [data, imageData] = await Promise.all([chatPromise, imagePromise]);
+
+            if (data && data.status === 'requires_age_verification') {
+                if (chatWindow && loadingMsg.parentNode === chatWindow) {
+                    chatWindow.removeChild(loadingMsg);
+                }
+                
+                // Cache user's message
+                pendingMessage = displayUserText;
+                
+                // Show age verification modal
+                const modalEl = document.getElementById('ageVerificationModal');
+                if (modalEl) {
+                    const ageModal = new bootstrap.Modal(modalEl);
+                    ageModal.show();
+                }
+                return;
+            }
 
             if (chatWindow && loadingMsg.parentNode === chatWindow) {
                 chatWindow.removeChild(loadingMsg);
@@ -536,6 +556,47 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hasWebSpeech) startWebSpeech();
             else startMediaRecorder();
         }
+    }
+
+    // ── Age Verification Modal Button Wiring ────────────────────────────────
+    const btnAgeYes = document.getElementById('btn-age-yes');
+    const btnAgeNo = document.getElementById('btn-age-no');
+    
+    if (btnAgeYes) {
+        btnAgeYes.addEventListener('click', () => {
+            localStorage.setItem('age_verified', 'true');
+            const modalEl = document.getElementById('ageVerificationModal');
+            if (modalEl) {
+                const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
+            }
+            if (pendingMessage) {
+                sendMessage(pendingMessage);
+                pendingMessage = null;
+            }
+        });
+    }
+    
+    if (btnAgeNo) {
+        btnAgeNo.addEventListener('click', () => {
+            localStorage.setItem('age_verified', 'false');
+            const modalEl = document.getElementById('ageVerificationModal');
+            if (modalEl) {
+                const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
+            }
+            
+            // Restart chat session
+            if (chatWindow) {
+                chatWindow.innerHTML = '';
+            }
+            sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('market_chat_session_id', sessionId);
+            
+            // Display standard helper disclaimer
+            appendMessage('🔞 You must be 18 years or older to search for or purchase energy drinks. The chat has been restarted.', 'bot');
+            pendingMessage = null;
+        });
     }
 
     // Initial setup
