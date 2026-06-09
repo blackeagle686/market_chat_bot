@@ -10,7 +10,7 @@ class Config:
     # LLM Config
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "ak_2yp3Xw1Ny7ky2pF7er9x93ZO9jj6G")
     OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.longcat.chat/openai")
-    OPENAI_LLM_MODEL = os.getenv("OPENAI_LLM_MODEL", "LongCat-Flash-Chat")
+    OPENAI_LLM_MODEL = os.getenv("OPENAI_LLM_MODEL", "LongCat-2.0-Preview")
     
     # VLM Config
     OPENAI_VLM_API_KEY = os.getenv("OPENAI_VLM_API_KEY", "")
