@@ -10,7 +10,7 @@ class OpenAILLM(BaseLLM):
     def __init__(self):
         self.api_key = getattr(config, "OPENAI_API_KEY", None)
         self.base_url = getattr(config, "OPENAI_BASE_URL", None)
-        self.model = getattr(config, "OPENAI_LLM_MODEL", None) or "LongCat-Flash-Chat"
+        self.model = getattr(config, "OPENAI_LLM_MODEL", None) or "LongCat-2.0-Preview"
         self.client = None
 
     def is_available(self) -> bool:
