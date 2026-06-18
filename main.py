@@ -144,13 +144,13 @@ app = FastAPI(title="Market AI ChatBot")
 
 # Initialize Firebase
 firebase_initialized = False
-firebase_creds_path = "super-market-c5327-firebase-adminsdk-fbsvc-b372f0f73c.json"
+firebase_creds_path = "ai-supermarket-d0eb0-firebase-adminsdk-fbsvc-03feb7ffac.json"
 
 if os.path.exists(firebase_creds_path):
     try:
         cred = credentials.Certificate(firebase_creds_path)
         firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://super-market-c5327-default-rtdb.europe-west1.firebasedatabase.app/'
+            'databaseURL': 'https://ai-supermarket-d0eb0-default-rtdb.firebaseio.com/'
         })
         firebase_initialized = True
         print("[+] Firebase initialized successfully.")
