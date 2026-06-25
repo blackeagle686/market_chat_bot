@@ -148,10 +148,11 @@ firebase_creds_path = "ai-supermarket-d0eb0-firebase-adminsdk-fbsvc-03feb7ffac.j
 
 if os.path.exists(firebase_creds_path):
     try:
-        cred = credentials.Certificate(firebase_creds_path)
-        firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://ai-supermarket-d0eb0-default-rtdb.firebaseio.com/'
-        })
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(firebase_creds_path)
+            firebase_admin.initialize_app(cred, {
+                'databaseURL': 'https://ai-supermarket-d0eb0-default-rtdb.firebaseio.com/'
+            })
         firebase_initialized = True
         print("[+] Firebase initialized successfully.")
     except Exception as e:
