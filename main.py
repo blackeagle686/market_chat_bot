@@ -555,6 +555,7 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
         
         if partition > 0:
             response = f"Sure, I am taking you to partition {partition}."
+            print(f"[Debug] Extracted partition: {partition}. Firebase initialized: {firebase_initialized}")
             # Update Firebase only if valid partition found
             if firebase_initialized:
                 try:
@@ -563,6 +564,8 @@ async def chat(request: Request, text: str = Form(...), session_id: str = Form("
                     print(f"[Firebase] Navigation updated to partition {partition}")
                 except Exception as e:
                     print(f"[Firebase Error] Failed to update partition: {e}")
+            else:
+                print("[Firebase] Skipped update because firebase_initialized is False")
         else:
             response = "I'm sorry, I couldn't find a partition number in our previous conversation to navigate to."
             print(f"[Warning] No partition found in text: '{bot_text[:50]}...'")
